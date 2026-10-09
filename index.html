@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b3d2e">
+<title>🏆 Super Totoamici 2026-27</title>
+<style>
+:root{
+  --bg:#06130d; --card:#0f2a1f; --card2:#164232; --line:rgba(255,255,255,.09); --text:#eaf5ef;
+  --mut:rgba(234,245,239,.62); --gold:#ffd400; --green:#1fb673; --amber:#e0a21a; --blue:#3b82f6;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;color:var(--text);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;
+  background:radial-gradient(1100px 520px at 50% -8%,#0f4a31 0,#06130d 62%) fixed,#06130d}
+body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+.b{background:#1d5b43;color:#fff;border:0;border-radius:22px;padding:10px 14px;font-weight:700;font-size:14px}
+.b.full{background:var(--gold);color:#222}
+#set{display:none;background:rgba(0,0,0,.35);padding:8px 12px 12px;border-bottom:1px solid var(--line);font-size:13px}
+#set label{display:block;margin:6px 0 2px;font-weight:700}
+#set input{width:100%;padding:9px 12px;border-radius:10px;border:0;font-size:15px}
+#set .hint{opacity:.75;margin:6px 0 8px;line-height:1.35}
+#adm{display:none;background:rgba(0,0,0,.35);padding:8px 12px 12px;border-bottom:1px solid var(--line);font-size:13px}
+#adm label{display:block;margin:8px 0 2px;font-weight:700}
+#adm input,#adm select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
+#adm .hint{opacity:.8;margin:2px 0 4px}
+#a_msg{margin-top:10px;font-size:13px;line-height:1.4}
+#info{font-size:11px;opacity:.85;padding:1px 10px 3px;line-height:1.3}
+.wrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+#msg{padding:30px;text-align:center;opacity:.8}
+
+/* ===== intestazione compatta ===== */
+#hd{display:grid;grid-template-rows:1fr;transition:grid-template-rows .2s ease;position:relative;z-index:10;background:linear-gradient(180deg,#0e5236,#0a3a27);box-shadow:0 2px 10px rgba(0,0,0,.55)}
+#hd.hide{grid-template-rows:0fr}
+#hd>.hi{overflow:hidden;min-height:0}
+.r1{display:flex;align-items:center;gap:6px;padding:5px 8px 3px}
+.r1 .logo{font-size:18px;line-height:1}
+.tabs{flex:1;display:flex;gap:3px;background:rgba(0,0,0,.38);padding:3px;border-radius:12px;min-width:0}
+.tab{flex:1;min-width:0;border:0;background:transparent;color:#cfe8dc;padding:6px 2px;border-radius:9px;font-weight:800;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab.on{background:var(--gold);color:#1a1a1a;box-shadow:0 1px 6px rgba(255,212,0,.4)}
+.adml{font-size:16px;text-decoration:none;background:rgba(0,0,0,.32);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.r2{display:flex;gap:5px;align-items:center;padding:3px 8px 4px}
+.r2 input{flex:1;min-width:0;height:32px;padding:0 12px;border-radius:16px;border:0;font-size:14px}
+.ib{background:#1d5b43;color:#fff;border:0;border-radius:16px;height:32px;min-width:32px;padding:0 9px;font-weight:700;font-size:12px;flex:none}
+.ib.full{background:var(--gold);color:#222;font-size:14px}
+
+/* avatar */
+.av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-weight:900;color:#fff;flex:none;box-shadow:inset 0 -4px 8px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.4)}
+
+/* podio */
+.pod{display:flex;align-items:flex-end;gap:8px;padding:8px 12px 0}
+.pc{flex:1;text-align:center;border-radius:18px 18px 0 0;padding:10px 4px 12px;border:1px solid var(--line);border-bottom:0;min-width:0}
+.pc.g1{min-height:158px;background:linear-gradient(180deg,rgba(255,212,0,.38),rgba(255,212,0,.05));border-color:rgba(255,212,0,.55)}
+.pc.g2{min-height:132px;background:linear-gradient(180deg,rgba(190,200,212,.34),rgba(190,200,212,.05))}
+.pc.g3{min-height:118px;background:linear-gradient(180deg,rgba(205,127,50,.4),rgba(205,127,50,.05))}
+.pc .md{font-size:26px;line-height:1}
+.pc .av{width:48px;height:48px;font-size:21px;margin:5px auto}
+.pc .n2{font-size:13px;font-weight:800;line-height:1.15;word-break:break-word}
+.pc .p2{font-size:24px;font-weight:900;color:var(--gold);margin-top:2px}
+.pc .j2{margin-top:4px}
+.jj{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ffb347,#f06a00);color:#fff;font:italic 900 17px/1 Georgia,"Times New Roman",serif;box-shadow:0 0 9px rgba(240,106,0,.6),inset 0 -3px 5px rgba(0,0,0,.25);text-shadow:0 1px 2px rgba(0,0,0,.45);vertical-align:middle}
+.jx{font-size:11px;font-weight:800;margin-left:2px;vertical-align:middle;color:#ffb347}
+
+/* righe classifica */
+.cap{font-size:11px;color:var(--mut);padding:6px 14px 0}
+.rw{display:flex;align-items:center;gap:8px;margin:6px 10px;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.rw .ps{width:28px;text-align:center;font-weight:900;font-size:15px;color:var(--mut);flex:none}
+.rw .nm{flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rw .pt{font-weight:900;font-size:21px;color:var(--gold);min-width:36px;text-align:right}
+.rw .jk{min-width:40px;text-align:center;font-size:14px}
+.rw.p1{border-color:rgba(255,212,0,.65);background:linear-gradient(90deg,rgba(255,212,0,.25),var(--card))}
+.rw.p2{border-color:rgba(190,200,212,.6);background:linear-gradient(90deg,rgba(190,200,212,.22),var(--card))}
+.rw.p3{border-color:rgba(205,127,50,.65);background:linear-gradient(90deg,rgba(205,127,50,.24),var(--card))}
+.tcs{display:flex;gap:4px}
+.tc{display:flex;flex-direction:column;align-items:center;min-width:29px;padding:2px 3px;border-radius:8px;background:rgba(255,255,255,.07)}
+.tc small{font-size:9px;opacity:.65;line-height:1.1}
+.tc b{font-size:14px;line-height:1.15}
+.tc.mx{background:linear-gradient(135deg,#ffe066,#f5a623);color:#1a1a1a;box-shadow:0 0 10px rgba(255,212,0,.55)}
+.tc.mx small{opacity:.8}
+.tcs.sm{justify-content:center;gap:3px;margin-top:6px}
+.tcs.sm .tc{min-width:21px;padding:1px 2px}
+.tcs.sm .tc small{display:none}
+.tcs.sm .tc b{font-size:11px}
+
+/* tabulato */
+.seg{display:flex;gap:4px;background:rgba(0,0,0,.38);padding:4px;border-radius:14px;margin:6px 10px 4px}
+.seg button{flex:1;border:0;background:transparent;color:#cfe8dc;padding:9px 4px;border-radius:11px;font-weight:800;font-size:13px}
+.seg button.on{background:var(--card2);color:#fff;box-shadow:0 0 0 1px var(--gold) inset}
+.hits{margin:6px 10px;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(255,212,0,.3),rgba(245,166,35,.1));border:1px solid rgba(255,212,0,.65);font-size:13px}
+.hits b{color:var(--gold)}
+.hits .hc{display:inline-block;margin:5px 6px 0 0;padding:3px 10px;border-radius:12px;background:var(--gold);color:#1a1a1a;font-weight:800;font-size:12px}
+details.leg{margin:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px}
+details.leg summary{font-weight:700;cursor:pointer}
+.lgw{overflow-x:auto;margin-top:8px}
+table.lg{width:100%;border-collapse:collapse;font-size:12px}
+table.lg th{text-align:left;padding:5px 6px;border-bottom:2px solid var(--gold);white-space:nowrap}
+table.lg td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.lg td.r{font-weight:900;font-size:14px;text-align:center}
+table.lg td.x{color:var(--gold)}
+.dbg{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.07);font-size:11px;line-height:1.4;word-break:break-word}
+table.tb{table-layout:fixed;border-collapse:separate;border-spacing:0;margin-bottom:14px}
+.tb thead th{position:sticky;top:0;z-index:3;background:#0c3d2a;padding:6px 1px 7px;font-size:11px;line-height:1.3;font-weight:700;border-bottom:2px solid var(--gold)}
+.tb thead th .mn{font-size:10px;opacity:.7}
+.tb thead th .sh{display:inline-block;background:rgba(255,255,255,.13);border-radius:6px;padding:0 5px;margin:1px 0;font-weight:800;letter-spacing:.3px}
+.tb thead th .e{display:inline-block;margin-top:3px;background:var(--gold);color:#1a1a1a;border-radius:9px;padding:0 6px;font-weight:900;font-size:12px}
+.tb thead th .e.no{background:transparent;color:var(--gold);opacity:.6;border:1px solid rgba(255,212,0,.5)}
+.tb thead th .rl{font-size:10px;color:var(--gold);font-weight:700;margin-top:4px}
+.tb td{height:58px;padding:0;border-bottom:1px solid var(--line);text-align:center}
+.tb tbody tr:nth-child(odd) td{background:#0d261c}
+.tb tbody tr:nth-child(even) td{background:#113126}
+.tb td.nm,.tb th.nm{position:sticky;left:0;z-index:2;text-align:left;padding:4px 8px;box-shadow:3px 0 6px rgba(0,0,0,.45)}
+.tb thead th.nm{z-index:5;font-size:12px;background:#0c3d2a}
+.tb .nw{display:flex;align-items:center;gap:7px}
+.tb .nw .av{width:30px;height:30px;font-size:13px}
+.tb .nw .tx{font-weight:700;font-size:13px;line-height:1.15;min-width:0}
+.tb .nw .tx small{display:block;font-size:10px;opacity:.5;font-weight:500}
+.bd{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-weight:900;font-size:15px;color:#fff;box-shadow:inset 0 -3px 5px rgba(0,0,0,.25)}
+.b1{background:#1f9d63}.bX{background:#c58a10}.b2{background:#2f6fdb}
+.bd.win{box-shadow:0 0 0 3px var(--gold),0 0 14px rgba(255,212,0,.8);transform:scale(1.1)}
+.bd.lose{opacity:.2;filter:grayscale(.9)}
+.tb td.xx{font-size:12px;line-height:1.2}
+.tb td.xx small{display:block;opacity:.65;font-size:10px}
+.tb td.bn b{font-size:14px}
+.tb td.hit{background:linear-gradient(135deg,#ffe066,#f5a623)!important;color:#1a1a1a!important;font-weight:900;box-shadow:inset 0 0 0 2px #fff6c4}
+.tb td.hit small{opacity:.75}
+.outs{margin:6px 10px;padding:10px 12px;border-radius:14px;background:rgba(31,182,115,.14);border:1px solid rgba(31,182,115,.55);font-size:13px}
+.outs b{color:#7df0b8}
+.outs .oc{display:inline-block;margin:5px 6px 0 0;padding:3px 10px;border-radius:12px;background:#1f9d63;color:#fff;font-weight:600;font-size:12px}
+.outs .oc b{color:#fff;font-weight:900}
+.tb td.us b{font-size:14px;color:#7df0b8}
+.tb td.us.hit b{color:#1a1a1a}
+.tb td.miss{background:rgba(255,90,95,.14)!important}
+.tb td.miss b{color:#ffb4b4}
+.tb td.jo .si{background:#f06a00;color:#fff;border-radius:11px;padding:3px 8px;font-weight:800;font-size:12px}
+.tb td.pt{font-weight:900;font-size:18px;color:var(--gold)}
+
+/* vista per partita */
+.mc{margin:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.mh{display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(90deg,#14543a,var(--card))}
+.mh .mnb{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#1a1a1a;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none;font-size:13px}
+.mh .mt{flex:1;min-width:0}
+.mh .mt small{display:block;font-size:11px;opacity:.65}
+.mh .mt b{font-size:15px;line-height:1.2}
+.mh .mt em{opacity:.5;font-style:normal;font-size:12px;margin:0 4px}
+.mh .mr{background:var(--gold);color:#1a1a1a;font-weight:900;border-radius:12px;padding:5px 11px;font-size:15px;flex:none}
+.mh .mr.no{background:transparent;color:var(--gold);border:1px solid rgba(255,212,0,.5);font-size:11px;font-weight:700}
+.pb{display:flex;height:24px;margin:10px 12px 4px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06)}
+.pb i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff;min-width:0;overflow:hidden}
+.pb i.s1{background:#1f9d63}.pb i.sX{background:#c58a10}.pb i.s2{background:#2f6fdb}
+details.gr{margin:4px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid transparent}
+details.gr summary{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;list-style:none}
+details.gr summary::-webkit-details-marker{display:none}
+details.gr summary b{font-size:16px}
+details.gr summary small{opacity:.65}
+details.gr summary .ar{margin-left:auto;opacity:.5}
+details.gr.win{border-color:rgba(255,212,0,.7);background:rgba(255,212,0,.12)}
+details.gr.lose{opacity:.55}
+.ch{padding:2px 10px 10px;display:flex;flex-wrap:wrap;gap:6px}
+.ch span{background:rgba(255,255,255,.1);border-radius:12px;padding:3px 10px;font-size:12px;font-weight:600}
+details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
+.mc .pad{height:8px}
+</style>
+</head>
+<body>
+<div id="hd"><div class="hi">
+  <div class="r1">
+    <span class="logo">⚽</span>
+    <div class="tabs" id="tabs"></div>
+    <a href="#admin" id="lAdm" class="adml" title="Admin">🔧</a>
+  </div>
+  <div class="r2">
+    <input id="q" type="search" placeholder="🔍 Cerca partecipante...">
+    <button class="ib" id="bDet">Turni ✓</button>
+    <button class="ib" id="bSet" title="Fogli">⚙️</button>
+    <button class="ib" id="bAdm" title="Risultati" style="display:none">✏️</button>
+    <button class="ib full" id="bFull" title="Schermo intero">⛶</button>
+  </div>
+  <div id="set">
+  <div class="hint"><b>Facoltativo</b>: i fogli vengono riconosciuti in automatico. Usa questi campi solo se qualcosa non funziona.<br>Apri il Google Sheet, tocca ogni scheda in basso e guarda l'indirizzo: dopo <b>gid=</b> c'è il numero. Incolla qui il numero (o l'intero link).</div>
+  <label>Foglio Classifica finale</label><input id="g_finale" inputmode="text" placeholder="es. 123456789">
+  <label>Foglio Classifica intermedia</label><input id="g_intermedia" inputmode="text" placeholder="es. 987654321">
+  <label>Foglio Tabulato</label><input id="g_tabulato" inputmode="text" placeholder="es. 456789123">
+  <div style="margin-top:10px"><button class="b full" id="bSave">Salva e ricarica</button></div>
+</div>
+  <div id="adm">
+  <div class="hint">Area riservata: inserisci i risultati man mano che escono.</div>
+  <label>Partita</label><select id="a_m"></select>
+  <label>🎯 Risultato esatto</label>
+  <select id="a_r"><option value="">— scegli —</option><option value="0-0">0-0</option><option value="0-1">0-1</option><option value="0-2">0-2</option><option value="0-3">0-3</option><option value="0-4">0-4</option><option value="1-0">1-0</option><option value="1-1">1-1</option><option value="1-2">1-2</option><option value="1-3">1-3</option><option value="1-4">1-4</option><option value="2-0">2-0</option><option value="2-1">2-1</option><option value="2-2">2-2</option><option value="2-3">2-3</option><option value="2-4">2-4</option><option value="3-0">3-0</option><option value="3-1">3-1</option><option value="3-2">3-2</option><option value="3-3">3-3</option><option value="3-4">3-4</option><option value="4-0">4-0</option><option value="4-1">4-1</option><option value="4-2">4-2</option><option value="4-3">4-3</option><option value="4-4">4-4</option><option value="ALTRO">ALTRO</option><option value="-">-</option></select>
+  <label>Risultato finale (1 / X / 2) <small style="font-weight:400;opacity:.75">— "Automatico" lo ricava dal punteggio; con ALTRO sceglilo tu</small></label>
+  <select id="a_e"><option value="">Automatico</option><option value="1">1</option><option value="X">X</option><option value="2">2</option><option value="-">-</option></select>
+  <label>Password</label><input id="a_p" type="password" autocomplete="off">
+  <label>Indirizzo del modulo (Apps Script)</label><input id="a_u" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="b full" id="a_s">💾 Salva risultato</button><button class="b" id="a_c">🗑 Azzera partita</button></div>
+  <div id="a_msg"></div>
+</div>
+  <div id="info"></div>
+</div></div>
+<div class="wrap" id="wrap"></div>
+
+<script>
+/* ==================== DATI (turno C4) ==================== */
+const NOMI = ["A.A","Alby 79","Alias","Annapaola","antonio59","Aquila Reale","Ares","Big Fish","bryan","Caffe Mena",
+"Carmela o The","Crienzo22","Cuore azzurro","el guerriero","El pablo","Fabiola","Forza napoli","Gabbiano","Geppetto","Luigi p.",
+"Luigib17","Maribet","master chef 1","master chef 2","Meraviglia","Mercedes 2026","Mikebali","Nexos","nick50","Nicolò",
+"noce","peppe o the","Pirata57","Pollame infettato","raffy","Rocchino","rosa","salvatoretoll","Scarabeo","Strega",
+"TonyArrow","Uomini Duri","Viktory","zuppetta pg"];
+
+const PARTITE = ["Sab 18:00 Croazia - Inghilterra","Sab 15:00 Finlandia - Albania","Sab 18:00 Islanda - Bulgaria",
+"Sab 20:30 Pro Vercelli - Carpi","Sab 14:30 Vado - Forlì","Dom 20:45 Grecia - Germania","Dom 20:45 Portogallo - Norvegia",
+"Dom 18:00 Kosovo - Austria","Dom 20:45 Irlanda - Israele","Dom 20:30 Salernitana - Bari","Dom 14:30 Cosenza - Foggia",
+"Dom 17:30 Reggiana - Spezia","Lun 20:45 Francia - Belgio","Lun 20:45 Italia - Turchia"];
+
+/* Per ogni gruppo di colonne: 14 righe (una per partita) con i pronostici, poi partita scelta e bonus */
+const PAGINE = [
+ { rows:[
+  "X X 2 2 2 2 2 2 X 2 2 X 2 2 2","2 2 1 1 1 1 1 X 1 1 1 1 1 1 2","2 2 1 1 X 1 1 1 2 1 2 1 2 1 X",
+  "1 2 1 1 1 1 1 1 1 1 1 1 1 X 1","X X 2 1 2 2 X X 2 X 2 X 2 2 2","2 2 2 2 2 X 2 2 2 1 2 2 2 2 2",
+  "1 1 1 1 X 1 1 1 2 1 1 X 2 1 1","2 X 2 2 2 2 2 2 1 1 X 2 2 X 2","X 1 1 1 1 1 1 1 2 1 1 1 X 1 1",
+  "X 2 X 1 1 X 1 1 1 1 1 2 X 1 1","1 X 1 1 2 2 2 2 X 1 1 X X 2 2","1 2 2 2 2 2 2 2 2 1 1 2 2 2 2",
+  "1 1 1 1 1 1 2 1 1 1 X 1 1 1 1","1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"],
+   scelta:["Francia - Belgio","Italia - Turchia","Salernitana - Bari","Portogallo - Norvegia","Pro Vercelli - Carpi","Portogallo - Norvegia","Reggiana - Spezia","Islanda - Bulgaria","Portogallo - Norvegia","Italia - Turchia","Pro Vercelli - Carpi","Italia - Turchia","Grecia - Germania","Vado - Forlì","Francia - Belgio"],
+   bonus:"1-0|3-1|0-0|1-1|1-3|2-2|1-1|2-0|2-1|3-1|2-1|2-0|0-2|ALTRO|1-1".split("|") },
+ { rows:[
+  "2 X 2 2 2 2 2 2 2 2 X 2 2 2 1","1 1 1 1 2 1 1 1 1 1 1 1 X 1 1","1 X 1 X X 1 1 1 1 1 1 1 1 X 1",
+  "X X 1 X 1 1 1 1 1 1 1 1 1 1 1","X 2 2 2 2 X 2 2 2 X 2 X 2 2 2","X X 2 2 2 2 X 2 2 2 2 2 2 2 2",
+  "2 1 1 X X 2 1 1 1 1 1 1 1 1 1","2 X 2 2 2 X 2 2 2 2 2 2 2 2 2","1 1 1 1 1 1 1 1 1 X 1 1 1 1 1",
+  "X 2 1 X X 1 1 1 1 1 1 X 1 1 1","X X 2 X 1 X 2 2 2 2 2 2 2 X 2","X X 2 X 2 2 2 2 2 2 2 1 X 2 X",
+  "1 1 1 1 1 1 1 1 1 1 X 1 1 2 1","1 1 1 1 1 1 X 1 1 1 1 1 2 1 X"],
+   scelta:["Portogallo - Norvegia","Croazia - Inghilterra","Italia - Turchia","Salernitana - Bari","Francia - Belgio","Irlanda - Israele","Francia - Belgio","Francia - Belgio","Italia - Turchia","Grecia - Germania","Kosovo - Austria","Francia - Belgio","Irlanda - Israele","Salernitana - Bari","Croazia - Inghilterra"],
+   bonus:"2-2|0-0|ALTRO|1-1|2-1|1-1|2-1|2-1|2-1|1-0|0-0|3-1|3-2|1-2|1-4".split("|") },
+ { rows:[
+  "2 2 1 X 2 1 X 2 X 2 2 2 X X","1 1 1 2 1 1 X 1 2 1 X X 2 1","1 2 1 1 2 1 2 1 1 1 1 1 1 1",
+  "X X 1 1 X 1 1 X 1 1 1 1 X 1","2 2 1 2 X 2 2 2 2 2 X 2 1 2","2 2 2 2 2 2 2 2 1 2 2 X 2 X",
+  "1 1 1 1 1 X 1 1 1 1 1 X 1 1","2 2 2 X 1 2 1 2 2 2 2 X 1 2","1 1 1 1 1 1 2 1 1 1 1 X 2 1",
+  "1 1 1 1 X X X 1 2 1 X X 2 1","2 2 1 1 1 2 1 2 2 2 2 X 1 2","2 2 1 X X 2 X X X 1 2 2 X 2",
+  "2 1 1 1 1 1 1 1 1 1 1 1 2 1","X 1 1 1 1 1 1 1 1 1 1 1 1 2"],
+   scelta:["Cosenza - Foggia","Italia - Turchia","Italia - Turchia","Grecia - Germania","Portogallo - Norvegia","Reggiana - Spezia","Irlanda - Israele","Cosenza - Foggia","Francia - Belgio","Salernitana - Bari","Portogallo - Norvegia","Salernitana - Bari","Irlanda - Israele","Finlandia - Albania"],
+   bonus:"2-1|4-0|ALTRO|1-3|2-1|0-3|0-2|3-0|3-1|1-1|2-1|0-0|1-1|0-1".split("|") }
+];
+const JOLLY_SI = [42];   /* indici (0-based) di chi gioca il jolly: Viktory */
+
+/* Classifica finale: [nome, punti] */
+const FINALE = [["Forza napoli",26],["Master chef 2",26],["TonyArrow",25],["el guerriero",23],["Master chef 1",23],["zuppetta pg",23],
+["Bryan",22],["noce",22],["Uomini Duri",22],["Alias",21],["Geppetto",21],["Maribet",21],["Mercedes 2026",21],["Mikebali",21],["Nicolò",21],["raffy",21],
+["Alby79",20],["Carmela o the",20],["Gabbiano",20],["Luigib17",20],["rosa",20],["salvatoretoll",20],["Strega",20],
+["Luigi p.",19],["peppe o the",19],["Ares",18],["Big Fish",18],["Meraviglia",18],["Nexos",18],
+["Annapaola",17],["crienzo22",17],["nick50",17],["Pirata57",17],["Pollame infettato",17],["Rocchino",17],
+["antonio59",16],["Aquila Reale",16],["El pablo",16],["Fabiola",16],["Scarabeo",16],["A.A",15],["Caffemena",14],["Cuore Azzurro",14],["Viktory",13]];
+
+/* Classifica intermedia C1-C4: [nome, C1, C2, C3, C4, punti] */
+const INTERMEDIA = [["el guerriero",5,8,10,0,23],["Master chef 1",8,7,8,0,23],["Master chef 2",8,7,8,0,23],["noce",4,9,9,0,22],["Uomini Duri",10,4,8,0,22],
+["Alias",8,6,7,0,21],["Geppetto",7,6,8,0,21],["Maribet",7,5,9,0,21],["Mikebali",8,4,9,0,21],["Nicolò",7,5,9,0,21],["raffy",5,8,8,0,21],
+["Alby79",8,9,3,0,20],["Carmela o the",8,6,6,0,20],["Forza napoli",7,7,6,0,20],["Gabbiano",5,8,7,0,20],["Luigib17",7,5,8,0,20],["rosa",8,6,6,0,20],["Strega",8,6,6,0,20],["zuppetta pg",7,6,7,0,20],
+["Luigi p.",7,5,7,0,19],["peppe o the",9,6,4,0,19],["TonyArrow",7,4,8,0,19],
+["Big Fish",5,6,7,0,18],["Meraviglia",5,4,9,0,18],["Mercedes 2026",4,5,9,0,18],["Nexos",4,6,8,0,18],
+["Annapaola",7,3,7,0,17],["crienzo22",5,6,6,0,17],["nick50",4,6,7,0,17],["Pirata57",8,4,5,0,17],["Pollame infettato",6,5,6,0,17],["Rocchino",4,5,8,0,17],["salvatoretoll",5,5,7,0,17],
+["Aquila Reale",4,7,5,0,16],["Bryan",6,4,6,0,16],["El pablo",3,5,8,0,16],["Fabiola",5,5,6,0,16],["Scarabeo",4,3,9,0,16],
+["A.A",8,5,2,0,15],["Ares",4,6,5,0,15],["Caffemena",6,4,4,0,14],["Cuore Azzurro",6,4,4,0,14],["antonio59",5,3,5,0,13],["Viktory",5,3,5,0,13]];
+
+
+
+/* ==================== CONFIGURAZIONE ==================== */
+const CONFIG = {
+  BASE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6XtbY4S0WB59_Cxe0vByMR91d-XXZ4cx6HGMBUa6hqlomWmEh55xcza0LOhECKMRQ8RElSGCSUUB/pub",
+  /* gid dei fogli: se lasci vuoto, la pagina prova a trovarli dal nome del foglio */
+  GID:   { finale:"", intermedia:"", tabulato:"" },
+  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat/i },
+  REFRESH: 60,
+  /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
+  EXACT: { row: 26, col: "D" },
+  /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
+  WEBAPP: ""
+};
+const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
+
+/* ==================== UTILITÀ ==================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"");
+const t = v => v==null ? "" : String(v).trim();
+const toNum = v => { const s=t(v).replace(',', '.'); if(!/^-?\d+(\.\d+)?$/.test(s)) return null; return parseFloat(s); };
+const is1x2 = v => /^[1Xx2]$/.test(t(v));
+
+function parseCSV(txt){
+  const out=[]; let r=[], f="", q=false;
+  for(let i=0;i<txt.length;i++){ const c=txt[i];
+    if(q){ if(c=='"'){ if(txt[i+1]=='"'){f+='"';i++} else q=false } else f+=c }
+    else if(c=='"') q=true;
+    else if(c==','){ r.push(f); f="" }
+    else if(c=='\n'){ r.push(f); out.push(r); r=[]; f="" }
+    else if(c!='\r') f+=c;
+  }
+  if(f!==""||r.length){ r.push(f); out.push(r) }
+  return out;
+}
+
+/* ==================== DATI INCORPORATI (fallback) ==================== */
+const P0 = NOMI.map((nome,i)=>({nome,preds:[],scelta:"",bonus:"",jolly:JOLLY_SI.includes(i)?"SI":"NO",tot:0}));
+let _b = 0;
+PAGINE.forEach(pg=>{
+  const g = pg.rows.map(r=>r.split(" "));
+  g[0].forEach((_,j)=>{ const p=P0[_b+j]; p.preds=g.map(r=>r[j]); p.scelta=pg.scelta[j]; p.bonus=pg.bonus[j]; });
+  _b += g[0].length;
+});
+const S = {
+  finale:     {live:false, data:FINALE},
+  intermedia: {live:false, data:{turni:["C1","C2","C3","C4"], rows:INTERMEDIA.map(r=>[r[0],[r[1],r[2],r[3],r[4]],r[5]])}},
+  tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",esito:""})), part:P0}},
+  err:"", time:"", sheets:[]
+};
+
+/* ==================== LETTURA DAL FOGLIO ==================== */
+function headerRow(rows, re){ return rows.findIndex(r=>r.some(c=>re.test(t(c)))); }
+
+function parseFinale(rows){
+  const h = headerRow(rows,/partecip/i); if(h<0) return null;
+  const hr = rows[h], nc = hr.findIndex(c=>/partecip/i.test(t(c)));
+  const pc = hr.findIndex((c,i)=>i>nc && /punt/i.test(t(c))); if(pc<0) return null;
+  const jc = hr.findIndex((c,i)=>i>nc && /jolly/i.test(t(c)));
+  const d = rows.slice(h+1).map(r=>[t(r[nc]), toNum(r[pc]), jc>=0 ? t(r[jc]) : ""]).filter(x=>x[0] && x[1]!==null);
+  return d.length>=3 ? d : null;
+}
+
+function parseInter(rows){
+  const h = headerRow(rows,/partecip/i); if(h<0) return null;
+  const hr = rows[h], nc = hr.findIndex(c=>/partecip/i.test(t(c)));
+  const tc = []; hr.forEach((c,i)=>{ if(/^c\d+$/i.test(t(c))) tc.push(i); });
+  let pc = -1; hr.forEach((c,i)=>{ if(i>nc && /^(punti|totale)/i.test(t(c))) pc=i; });
+  if(!tc.length || pc<0) return null;
+  const d = rows.slice(h+1).map(r=>[t(r[nc]), tc.map(c=>toNum(r[c])??0), toNum(r[pc])]).filter(x=>x[0] && x[2]!==null);
+  return d.length>=3 ? {turni:tc.map(c=>t(hr[c]).toUpperCase()), rows:d} : null;
+}
+
+function parseTab(rows){
+  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
+  if(!mr.length) return null;
+  const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
+  const first = blk[0], last = blk[blk.length-1];
+  let nameRow=null, best=-1;
+  for(let i=Math.max(0,first-4); i<first; i++){
+    const n = rows[i].filter(c=>t(c) && !/^\d+$/.test(t(c))).length;
+    if(n>best){ best=n; nameRow=rows[i]; }
+  }
+  if(!nameRow || best<3) return null;
+  let labelCol=0, len=-1;
+  rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
+  let start = labelCol+1, resultCol = -1;
+  const hc = t(nameRow[start]);
+  if(hc==="" || /^c\d+$/i.test(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
+  const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
+  if(cols.length<3) return null;
+  const partite = blk.map(i=>{
+    let ris = resultCol>=0 ? t(rows[i][resultCol]) : "";
+    const raw = ris;
+    if(/^[-–]?$/.test(ris)) ris = "";
+    let esito = "";
+    if(is1x2(ris)) esito = ris.toUpperCase();
+    else { const m = ris.match(/^(\d+)\s*[-–—−:\/]\s*(\d+)$/); if(m) esito = +m[1]>+m[2] ? "1" : (+m[1]<+m[2] ? "2" : "X"); }
+    return {label:t(rows[i][labelCol]), ris, raw, esito};
+  });
+  const exRow = rows[CONFIG.EXACT.row-1] || [], ec0 = colIdx(CONFIG.EXACT.col);
+  partite.forEach((m,k)=>{ m.ex = t(exRow[ec0+k]); });
+  const after = rows.slice(last+1);
+  const lab = r => r.slice(0,start).map(t).join(" ").toLowerCase();
+  const find = (re,not) => after.findIndex(r=>{ const l=lab(r); return re.test(l) && !(not && not.test(l)); });
+  const iB=find(/bonus/), iJ=find(/jolly/,/punti/), iT=find(/totale/), iE=find(/risultato esatto/,/punti|bonus/), iPE=find(/punti.*risultato esatto/);
+  const iS = (iB>0 && !/[a-zà-ú]/i.test(lab(after[iB-1]))) ? iB-1 : -1;
+  const part = cols.map(c=>({
+    nome: t(nameRow[c]),
+    preds: blk.map(i=>t(rows[i][c]).toUpperCase()),
+    scelta: iS>=0 ? t(after[iS][c]) : "",
+    bonus:  iB>=0 ? t(after[iB][c]) : "",
+    jolly:  iJ>=0 && /^s[iì]/i.test(t(after[iJ][c])) ? "SI" : "NO",
+    esatto: iE>=0 ? t(after[iE][c]) : "",
+    pEsatto: iPE>=0 ? (toNum(after[iPE][c])??0) : 0,
+    tot:    iT>=0 ? (toNum(after[iT][c])??0) : 0
+  }));
+  return {partite, part, dbg:{labelCol, resultCol, start}};
+}
+
+/* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
+const PROXIES = [u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u), u=>"https://corsproxy.io/?"+encodeURIComponent(u)];
+async function getText(url){
+  let last = "";
+  for(const u of [url, ...PROXIES.map(f=>f(url))]){
+    try{
+      const r = await fetch(u, {cache:"no-store"});
+      if(!r.ok){ last = "HTTP "+r.status; continue; }
+      const tx = await r.text();
+      if(tx && tx.length>20) return tx;
+      last = "risposta vuota";
+    }catch(e){ last = e.message; }
+  }
+  throw new Error(last || "rete non raggiungibile");
+}
+async function csv(gid){
+  return parseCSV(await getText(CONFIG.BASE+"?gid="+gid+"&single=true&output=csv&t="+Date.now()));
+}
+async function discover(){
+  try{
+    const h = await getText(CONFIG.BASE.replace(/\/pub$/,"/pubhtml")+"?t="+Date.now());
+    const out = [], seen = new Set();
+    const add = (gid,name)=>{ if(!seen.has(gid)){ seen.add(gid); out.push({gid, name:name||("gid "+gid)}); } };
+    let m;
+    const re1 = /sheet-button-(\d+)[^>]*>\s*(?:<a[^>]*>)?\s*([^<]+?)\s*</g;
+    while((m=re1.exec(h))) add(m[1], m[2]);
+    const re2 = /name:\s*"((?:[^"\\]|\\.)*)"[^{}]*?gid:\s*"(\d+)"/g;
+    while((m=re2.exec(h))) add(m[2], m[1].replace(/\\u([\da-f]{4})/gi,(_,x)=>String.fromCharCode(parseInt(x,16))));
+    const re3 = /[?&;#]gid=(\d+)/g;
+    while((m=re3.exec(h))) add(m[1], "");
+    if(!out.length) throw new Error("nessun foglio nel codice pubblicato");
+    S.discErr = ""; return out;
+  }catch(e){ S.discErr = "ricerca fogli: "+e.message; return [{gid:"0", name:"primo foglio"}]; }
+}
+/* riconosce il tipo di foglio dal contenuto */
+function classify(rows){
+  const i = parseInter(rows); if(i) return ["intermedia", i];
+  const tb = parseTab(rows);  if(tb) return ["tabulato", tb];
+  const f = parseFinale(rows); if(f) return ["finale", f];
+  return null;
+}
+
+async function loadAll(){
+  const KS = ["finale","intermedia","tabulato"], errs = [], fresh = {};
+  const parsers = {finale:parseFinale, intermedia:parseInter, tabulato:parseTab};
+  if(!S.map) S.map = {};
+  KS.forEach(k=>{ if(CONFIG.GID[k]) S.map[k] = CONFIG.GID[k]; });
+  const missing = KS.filter(k=>!S.map[k]);
+  if(missing.length){
+    if(!S.sheets.length) S.sheets = await discover();
+    const cand = {};
+    for(const sh of S.sheets){
+      if(Object.values(S.map).includes(sh.gid)) continue;
+      try{
+        const c = classify(await csv(sh.gid));
+        if(c) (cand[c[0]] = cand[c[0]] || []).push({gid:sh.gid, name:sh.name, data:c[1]});
+      }catch(e){ S.lastErr = "gid "+sh.gid+": "+e.message; }
+    }
+    for(const k of missing){
+      const list = cand[k] || [];
+      const pick = list.find(x=>CONFIG.NAMES[k].test(x.name)) || list[0];
+      if(pick){ S.map[k]=pick.gid; S[k]={live:true, data:pick.data}; fresh[k]=true; }
+    }
+  }
+  for(const k of KS){
+    if(fresh[k]) continue;
+    const gid = S.map[k];
+    if(!gid){ errs.push(k+": foglio non riconosciuto"+(S.lastErr?" ("+S.lastErr+")":"")); continue; }
+    try{
+      const d = parsers[k](await csv(gid));
+      if(!d) throw new Error("formato non riconosciuto");
+      S[k] = {live:true, data:d};
+    }catch(e){ errs.push(k+": "+e.message); }
+  }
+  if(errs.length && S.discErr) S.sheets = [];   /* riprova la ricerca al prossimo giro */
+  S.err = errs.join(" • ");
+  S.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+  render();
+}
+
+/* ==================== VISTE ==================== */
+let cur = 0, showDet = true, tv = "p";
+const KEYS = ["finale","intermedia","tabulato"];
+const medal = pos => ["🥇","🥈","🥉"][pos-1] || pos;
+function ranked(list, f){
+  const s = list.slice().sort((a,b)=>f(b)-f(a));
+  let pos=0, last=null;
+  return s.map((x,i)=>{ const v=f(x); if(v!==last){pos=i+1; last=v} return {x,pos}; });
+}
+function infoLine(n){
+  const s = S[KEYS[cur]];
+  let h = "v19 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
+  $("info").innerHTML = h;
+}
+const hue = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))%360; return h; };
+const av = n => `<span class="av" style="background:hsl(${hue(n)},55%,38%)">${esc(((String(n).match(/[A-Za-zÀ-ú0-9]/)||["?"])[0]).toUpperCase())}</span>`;
+function jollyCell(v){
+  v = t(v);
+  if(!v || /^(-|–|no|0)$/i.test(v)) return '<span style="opacity:.3">–</span>';
+  const J = n => '<span class="jj">J</span>' + (n>1 ? '<small class="jx">×'+n+'</small>' : '');
+  if(/^j+$/i.test(v)) return J(v.length);
+  if(/^\d+$/.test(v)) return J(+v);
+  if(/^s[iì]$/i.test(v)) return J(1);
+  return esc(v);
+}
+
+const chipsOf = (r, d, mx, sm) => '<div class="tcs'+(sm?" sm":"")+'">' + r.x[1].map((v,k)=>`<div class="tc${v===mx[k] && v>0 ? " mx" : ""}"><small>${esc(d.turni[k])}</small><b>${v}</b></div>`).join("") + "</div>";
+function viewClassifica(){
+  const q = norm($("q").value), d = S[KEYS[cur]].data;
+  const isInt = cur===1;
+  const all = ranked(isInt ? d.rows : d, x=>isInt ? x[2] : x[1]);
+  const mx = isInt ? d.turni.map((_,k)=>Math.max(...d.rows.map(x=>x[1][k]))) : [];
+  const ptsOf = r => isInt ? r.x[2] : r.x[1];
+  let list = all.filter(r=>!q || norm(r.x[0]).includes(q));
+  let h = "";
+  if(!q && all.length>=3){
+    const top = all.slice(0,3);
+    h += '<div class="pod">' + [1,0,2].map(i=>{
+      const r = top[i];
+      return `<div class="pc g${Math.min(r.pos,3)}"><div class="md">${medal(r.pos)}</div>${av(r.x[0])}<div class="n2">${esc(r.x[0])}</div><div class="p2">${ptsOf(r)}</div>${isInt ? (showDet ? chipsOf(r,d,mx,true) : "") : `<div class="j2">${jollyCell(r.x[2])}</div>`}</div>`;
+    }).join("") + "</div>";
+    list = all.slice(3);
+  }
+  h += `<div class="cap">${isInt ? "Miglior punteggio di ogni turno in oro" : "J = jolly giocati"}</div>`;
+  list.forEach(r=>{
+    h += `<div class="rw${r.pos<=3?" p"+r.pos:""}"><div class="ps">${medal(r.pos)}</div>${av(r.x[0])}<div class="nm">${esc(r.x[0])}</div>`;
+    if(isInt && showDet) h += chipsOf(r,d,mx,false);
+    if(!isInt) h += `<div class="jk">${jollyCell(r.x[2])}</div>`;
+    h += `<div class="pt">${ptsOf(r)}</div></div>`;
+  });
+  $("wrap").innerHTML = (list.length || h) ? h : '<div id="msg">Nessun partecipante trovato</div>';
+  infoLine(q ? list.length : all.length);
+}
+
+/* ---- tabulato ---- */
+const ab = s => s.replace(/\s+/g,"").slice(0,3).toUpperCase();
+function splitMatch(label){
+  const m = label.match(/^([A-Za-zÀ-ú]{2,4})\s+(\d{1,2}[:.]\d{2})\s+(.+)$/);
+  const when = m ? m[1]+" "+m[2] : "", teams = m ? m[3] : label;
+  const tt = teams.split(/\s+-\s+/);
+  return {when, teams, ta:tt[0]||"", tb:tt[1]||"", a:ab(tt[0]||""), b:ab(tt[1]||"")};
+}
+function setTv(v){ tv=v; render(); $("wrap").scrollTo(0,0); }
+const nrm = x => String(x).toLowerCase().replace(/\s+/g,"");
+const isScore = x => /^\d+\s*[-–—−:\/]\s*\d+$/.test(t(x));
+const sc2 = x => t(x).replace(/\s+/g,"").replace(/[–—−:\/]/g,"-").toUpperCase();
+const isAltro = x => /^altro$/i.test(t(x));
+const isOut = x => isScore(x) || isAltro(x);          /* risultato esatto valido: punteggio oppure ALTRO */
+const showOut = x => isAltro(x) ? "ALTRO" : t(x);
+/* risultato esatto indovinato: SOLO se il punteggio coincide, o il foglio lo segna in modo esplicito, o assegna punti */
+function exactOf(p, M){
+  const k = p.scelta ? M.findIndex(m=>nrm(m.label).includes(nrm(p.scelta))) : -1;
+  const calc = k>=0 && !!M[k].out && isOut(p.bonus) && sc2(M[k].out)===sc2(p.bonus);
+  const ex = t(p.esatto);
+  const flag = /^(s[iì]|ok|✓|✔|✅|vero|true|esatto|corretto|giusto)$/i.test(ex) || (isOut(ex) && isOut(p.bonus) && sc2(ex)===sc2(p.bonus));
+  return {hit: calc || flag || (+p.pEsatto||0)>0, k};
+}
+const seg = () => `<div class="seg"><button class="${tv==="p"?"on":""}" onclick="setTv('p')">👤 Per partecipante</button><button class="${tv==="m"?"on":""}" onclick="setTv('m')">⚽ Per partita</button></div>`;
+function hitsBanner(d, M){
+  const hs = d.part.map(p=>({p, e:exactOf(p,M)})).filter(o=>o.e.hit);
+  if(!hs.length) return "";
+  return '<div class="hits">🏆 <b>Risultati esatti indovinati</b><br>' + hs.map(o=>{
+    const m = o.e.k>=0 ? M[o.e.k] : null;
+    return `<span class="hc">${esc(o.p.nome)} · ${m ? esc(m.a)+"–"+esc(m.b)+" " : ""}${esc(o.p.bonus)}</span>`;
+  }).join("") + "</div>";
+}
+
+let OVR = {};
+try{ OVR = JSON.parse(localStorage.getItem("toto_res")||"{}"); }catch(e){}
+const esitoFromScore = x => { const m = sc2(x).match(/^(\d+)-(\d+)$/); return m ? (+m[1]>+m[2] ? "1" : (+m[1]<+m[2] ? "2" : "X")) : ""; };
+function buildM(d){
+  const M = d.partite.map(m=>({...m, ...splitMatch(m.label), out: isOut(m.ex) ? showOut(m.ex) : (isOut(m.ris) ? showOut(m.ris) : "")}));
+  M.forEach(m=>{   /* risultato inserito da qui, visibile subito su questo dispositivo */
+    const o = OVR[m.label]; if(!o || typeof o!=="object") return;
+    if(!m.out && isOut(o.x)) m.out = showOut(o.x);
+    if(!m.esito && /^[1X2]$/.test(t(o.e).toUpperCase())) m.esito = t(o.e).toUpperCase();
+  });
+  M.forEach(m=>{ m.hasEsito = !!m.esito; });   /* esito 1/X/2 realmente presente (colonna C o inserito da qui) */
+  const votes = M.map(()=>new Set());
+  d.part.forEach(p=>{
+    if(!p.scelta || !isOut(p.esatto)) return;
+    const k = M.findIndex(m=>nrm(m.label).includes(nrm(p.scelta)));
+    if(k>=0) votes[k].add(sc2(p.esatto));
+  });
+  /* se la colonna risultati non ha il punteggio, lo deduco dalla riga "Risultato esatto" dei partecipanti (solo se tutti concordano) */
+  M.forEach((m,k)=>{ if(!m.out && votes[k].size===1) m.out = [...votes[k]][0]; });
+  M.forEach(m=>{
+    /* "ALTRO" da solo non prova che la partita sia stata giocata (può essere un valore di default del foglio): lo accetto solo se c'è anche l'esito 1/X/2 */
+    if(m.out && isAltro(m.out) && !m.hasEsito) m.out = "";
+    if(m.out && !m.esito) m.esito = esitoFromScore(m.out); m.shown = m.esito || ""; });   /* intestazione: sempre l'esito finale 1 / X / 2 (l'esatto sta nelle sue colonne) */
+  return M;
+}
+function outsBanner(M){
+  const o = M.filter(m=>m.out);
+  if(!o.length) return "";
+  return '<div class="outs">⚽ <b>Risultati usciti</b><br>' + o.map(m=>`<span class="oc">${esc(m.a)}–${esc(m.b)} <b>${esc(showOut(m.out))}</b></span>`).join("") + "</div>";
+}
+function viewTabulato(){ if(tv==="m") viewPartite(); else viewPartecipanti(); }
+
+function viewPartecipanti(){
+  const q = norm($("q").value), d = S.tabulato.data;
+  const M = buildM(d);
+  const part = d.part.map((p,i)=>({p,i})).filter(o=>!q || norm(o.p.nome).includes(q));
+  let h = seg() + hitsBanner(d, M) + outsBanner(M);
+  const winners = M.map(()=>[]);
+  d.part.forEach(p=>{ const e = exactOf(p,M); if(e.hit && e.k>=0) winners[e.k].push(p.nome); });
+  h += '<details class="leg"><summary>📅 Partite e risultati</summary><div class="lgw"><table class="lg"><thead><tr><th>#</th><th>Partita</th><th>Esito</th><th>🎯 Esatto</th><th>Indovinato da</th></tr></thead><tbody>' +
+    M.map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m.when)}<br><b>${esc(m.teams)}</b></td><td class="r">${esc(m.esito||(is1x2(m.ris)?m.ris.toUpperCase():"–"))}</td><td class="r x">${m.out ? esc(showOut(m.out)) : "–"}</td><td>${winners[i].length ? winners[i].map(esc).join(", ") : '<span style="opacity:.4">–</span>'}</td></tr>`).join("") +
+    "</tbody></table></div>" +
+    (M.some(m=>m.out) ? "" : '<div class="dbg">ℹ️ Nessun punteggio esatto trovato nel foglio. ' + (d.dbg ? ("Esiti letti (C3:C16): "+esc(M.map(m=>m.raw===""||m.raw==null?"∅":m.raw).join(" ")) + "<br>Risultati esatti letti ("+esc(CONFIG.EXACT.col)+esc(CONFIG.EXACT.row)+" e seguenti): "+esc(M.map(m=>m.ex===""||m.ex==null?"∅":m.ex).join(" | "))) : "Dati incorporati: collegati al foglio compariranno qui.") + "</div>") +
+    "</details>";
+  if(!part.length){ $("wrap").innerHTML = h+'<div id="msg">Nessun partecipante trovato</div>'; infoLine(0); return; }
+  h += '<table class="tb"><colgroup><col style="width:150px">' + M.map(()=>'<col style="width:46px">').join("") +
+       '<col style="width:92px"><col style="width:82px"><col style="width:48px"><col style="width:48px"></colgroup>';
+  h += '<thead><tr><th class="nm">Partecipante<div class="rl">Risultato ▸</div></th>' +
+       M.map((m,i)=>`<th><div class="mn">${i+1}</div><span class="sh">${esc(m.a)}</span><br><span class="sh">${esc(m.b)}</span><br><span class="e${m.shown?"":" no"}">${esc(m.shown||"–")}</span></th>`).join("") +
+       "<th>🎯 Risultato esatto</th><th>✅ Uscito</th><th>🃏</th><th>Pt</th></tr></thead><tbody>";
+  part.forEach(({p,i})=>{
+    const ex = exactOf(p, M);
+    h += `<tr><td class="nm"><div class="nw">${av(p.nome)}<span class="tx"><small>#${i+1}</small>${esc(p.nome)}</span></div></td>`;
+    M.forEach((m,k)=>{
+      const v = p.preds[k] || "";
+      const st = m.esito ? (v===m.esito ? " win" : " lose") : "";
+      h += /^[1X2]$/.test(v) ? `<td><span class="bd b${v}${st}">${v}</span></td>` : "<td></td>";
+    });
+    const sc = p.scelta ? splitMatch(p.scelta) : null;
+    const mm = ex.k>=0 ? M[ex.k] : null, played = !!mm && !!mm.out;
+    const out = played ? showOut(mm.out) : (isOut(p.esatto) ? showOut(p.esatto) : "");
+    const cls = ex.hit ? " hit" : (out && isOut(p.bonus) ? " miss" : "");
+    h += `<td class="xx bn${cls}">${sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:""}<b>${esc(p.bonus||"–")}</b>` +
+         (ex.hit ? "<small>✓ esatto</small>" : "") + "</td>";
+    h += `<td class="xx us${ex.hit?" hit":""}">` + (out ? (sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:"") + `<b>${esc(out)}</b>` : '<span style="opacity:.3">–</span>') + "</td>";
+    h += `<td class="xx jo">${p.jolly==="SI"?'<span class="si">SÌ</span>':'<span style="opacity:.3">–</span>'}</td>`;
+    h += `<td class="pt">${p.tot}</td></tr>`;
+  });
+  $("wrap").innerHTML = h+"</tbody></table>";
+  infoLine(part.length);
+}
+
+function viewPartite(){
+  const q = norm($("q").value), d = S.tabulato.data;
+  const M = buildM(d);
+  const tot = d.part.length || 1;
+  let h = seg() + hitsBanner(d, M) + outsBanner(M);
+  M.forEach((m,i)=>{
+    const g = {"1":[], "X":[], "2":[]};
+    d.part.forEach(p=>{ const v=p.preds[i]; if(g[v]) g[v].push(p.nome); });
+    const pc = v => Math.round(g[v].length*100/tot);
+    h += `<div class="mc"><div class="mh"><div class="mnb">${i+1}</div><div class="mt"><small>${esc(m.when)}</small><b>${esc(m.ta)}${m.tb?`<em>vs</em>${esc(m.tb)}`:""}</b></div><div class="mr${m.shown?"":" no"}">${esc(m.shown||"da giocare")}</div></div>`;
+    h += '<div class="pb">' + ["1","X","2"].map(v=>g[v].length ? `<i class="s${v}" style="width:${pc(v)}%">${pc(v)>=12 ? v+" "+pc(v)+"%" : ""}</i>` : "").join("") + "</div>";
+    ["1","X","2"].forEach(v=>{
+      const names = g[v].filter(n=>!q || norm(n).includes(q));
+      const st = m.esito ? (m.esito===v ? " win" : " lose") : "";
+      h += `<details class="gr${st}"${(m.esito===v || (q && names.length)) ? " open" : ""}><summary><span class="bd b${v}">${v}</span><b>${g[v].length}</b><small>${pc(v)}%</small><span class="ar">▾</span></summary><div class="ch">${names.map(n=>`<span>${esc(n)}</span>`).join("") || '<span style="opacity:.5">nessuno</span>'}</div></details>`;
+    });
+    h += '<div class="pad"></div></div>';
+  });
+  $("wrap").innerHTML = h;
+  infoLine(d.part.length);
+}
+
+function fillAdm(){
+  const sel = $("a_m"); if(!sel || !S.tabulato) return;
+  const labels = S.tabulato.data.partite.map(m=>m.label), sig = labels.join("|");
+  if(sel.dataset.sig === sig) return;
+  const prev = sel.value; sel.dataset.sig = sig;
+  sel.innerHTML = labels.map((l,i)=>`<option value="${esc(l)}">${i+1} · ${esc(l)}</option>`).join("");
+  if(labels.includes(prev)) sel.value = prev;
+}
+const admMsg = x => { $("a_msg").innerHTML = x; };
+async function sendRes(clear){
+  const sel = $("a_m"), label = sel.value, url = $("a_u").value.trim(), pwd = $("a_p").value;
+  const n = (sel.selectedIndex||0) + 1;
+  let res = clear ? "-" : t($("a_r").value);
+  if(/^altro$/i.test(res)) res = "ALTRO";
+  let es = clear ? "-" : t($("a_e").value).toUpperCase();
+  if(!label || !url){ admMsg("⚠️ Scegli la partita e inserisci l'indirizzo del modulo."); return; }
+  if(!clear){
+    if(!res){ admMsg("⚠️ Scegli il risultato esatto (anche solo il trattino)."); return; }
+    if(res!=="-" && res!=="ALTRO" && !/^\d+-\d+$/.test(res)){ admMsg("⚠️ Risultato esatto non valido."); return; }
+    if(!es){
+      if(res==="-") es = "-";
+      else if(res==="ALTRO"){ admMsg("⚠️ Con ALTRO scegli anche il risultato finale (1, X, 2 oppure -)."); return; }
+      else es = esitoFromScore(res);
+    }
+  }
+  try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
+  const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&label="+encodeURIComponent(label)+"&n="+n+"&x="+encodeURIComponent(res)+"&e="+encodeURIComponent(es);
+  admMsg("⏳ Invio…");
+  let note = "";
+  try{
+    const r = await fetch(q); const j = await r.json();
+    if(!j.ok){ admMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    note = "Salvato nel foglio: esito in riga "+j.row+", risultato esatto in "+esc(j.exact||"")+".";
+  }catch(e){
+    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio."; }
+    catch(e2){ admMsg("⚠️ Impossibile contattare il modulo: "+esc(e2.message)); return; }
+  }
+  if(clear || (res==="-" && es==="-")) delete OVR[label]; else OVR[label] = {x:res, e:es};
+  try{ localStorage.setItem("toto_res", JSON.stringify(OVR)); }catch(e){}
+  render();
+  admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
+}
+
+/* intestazione: si nasconde scorrendo verso il basso e riappare scorrendo verso l'alto */
+function autoHide(hd, w, panelOpen){
+  let last = 0, lock = 0;
+  w.addEventListener("scroll", ()=>{
+    const y = w.scrollTop, now = Date.now(), hidden = hd.classList.contains("hide");
+    if(now < lock){ last = y; return; }
+    if(panelOpen()){ if(hidden){ hd.classList.remove("hide"); lock = now+350; } last = y; return; }
+    if(hidden && y < 24){ hd.classList.remove("hide"); lock = now+350; last = y; return; }
+    const dy = y - last;
+    if(dy > 14 && y > 90 && !hidden){ hd.classList.add("hide"); lock = now+350; last = y; }
+    else if(dy < -14 && hidden){ hd.classList.remove("hide"); lock = now+350; last = y; }
+    else if(Math.abs(dy) > 14) last = y;
+  }, {passive:true});
+}
+
+function render(){
+  fillAdm();
+  $("bDet").style.display = cur===1 ? "" : "none";
+  if(cur===2) viewTabulato(); else viewClassifica();
+}
+
+/*INIT*/
+["🏆 Finale","📈 Intermedia","📋 Tabulato"].forEach((label,i)=>{
+  const b = document.createElement("button");
+  b.className = "tab"+(i===0?" on":""); b.textContent = label;
+  b.onclick = ()=>{ cur=i; document.querySelectorAll(".tab").forEach((x,k)=>x.classList.toggle("on",k===i)); render(); $("wrap").scrollTo(0,0); };
+  $("tabs").appendChild(b);
+});
+$("q").addEventListener("input", render);
+$("bDet").onclick = ()=>{ showDet=!showDet; $("bDet").textContent = showDet ? "Turni ✓" : "Turni ✗"; render(); };
+$("bFull").onclick = ()=>{ const el=document.documentElement;
+  if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el); };
+const GKEYS = ["finale","intermedia","tabulato"];
+const cleanGid = v => { const m = String(v||"").match(/gid=(\d+)/) || String(v||"").match(/^\s*(\d+)\s*$/); return m ? m[1] : ""; };
+try{ const g = JSON.parse(localStorage.getItem("toto_gid")||"{}"); GKEYS.forEach(k=>{ if(g[k]) CONFIG.GID[k]=g[k]; }); }catch(e){}
+GKEYS.forEach(k=>{ $("g_"+k).value = CONFIG.GID[k]; });
+$("bSet").onclick = ()=>{ const p=$("set"); p.style.display = p.style.display==="block" ? "none" : "block"; };
+$("bSave").onclick = ()=>{
+  GKEYS.forEach(k=>{ CONFIG.GID[k] = cleanGid($("g_"+k).value); $("g_"+k).value = CONFIG.GID[k]; });
+  try{ localStorage.setItem("toto_gid", JSON.stringify(CONFIG.GID)); }catch(e){}
+  $("set").style.display = "none"; loadAll();
+};
+function openAdm(){ $("bAdm").style.display = ""; $("adm").style.display = "block"; fillAdm(); }
+autoHide($("hd"), $("wrap"), ()=> $("set").style.display==="block" || $("adm").style.display==="block" || document.activeElement===$("q"));
+if(location.hash==="#admin") openAdm();
+window.addEventListener("hashchange", ()=>{ if(location.hash==="#admin") openAdm(); });
+$("lAdm").onclick = e=>{ e.preventDefault(); try{ history.replaceState(null,"","#admin"); }catch(x){} openAdm(); try{ window.scrollTo(0,0); }catch(x){} };
+$("bAdm").onclick = ()=>{ const a=$("adm"); a.style.display = a.style.display==="block" ? "none" : "block"; fillAdm(); };
+$("a_s").onclick = ()=>sendRes(false);
+$("a_c").onclick = ()=>sendRes(true);
+try{ const g = JSON.parse(localStorage.getItem("toto_adm")||"{}"); $("a_u").value = g.u || CONFIG.WEBAPP; $("a_p").value = g.p||""; }catch(e){ $("a_u").value = CONFIG.WEBAPP; }
+if(!$("a_u").value) $("a_u").value = CONFIG.WEBAPP;
+render();
+loadAll(); setInterval(loadAll, CONFIG.REFRESH*1000);
+</script>
+</body>
+</html>
