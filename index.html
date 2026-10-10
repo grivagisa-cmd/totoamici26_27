@@ -278,7 +278,7 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: ""
+  WEBAPP: "https://script.google.com/macros/s/AKfycbzY-cJGFbbDg2dgoUrsPuWj73aMWfI0xVREj8u59qmEFjO27p9RJjZNI0GjxSCjZBSk/exec"
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
