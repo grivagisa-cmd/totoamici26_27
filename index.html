@@ -21,14 +21,6 @@ html,body{margin:0;height:100%;color:var(--text);font-family:system-ui,-apple-sy
 body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 .b{background:#1d5b43;color:#fff;border:0;border-radius:22px;padding:10px 14px;font-weight:700;font-size:14px}
 .b.full{background:var(--gold);color:#222}
-#set{display:none;background:rgba(0,0,0,.35);padding:8px 12px 12px;border-bottom:1px solid var(--line);font-size:13px}
-#set label{display:block;margin:6px 0 2px;font-weight:700}
-#set input{width:100%;padding:9px 12px;border-radius:10px;border:0;font-size:15px}
-#set .hint{opacity:.75;margin:6px 0 8px;line-height:1.35}
-#adm{display:none;background:rgba(0,0,0,.35);padding:8px 12px 12px;border-bottom:1px solid var(--line);font-size:13px}
-#adm label{display:block;margin:8px 0 2px;font-weight:700}
-#adm input,#adm select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
-#adm .hint{opacity:.8;margin:2px 0 4px}
 #a_msg{margin-top:10px;font-size:13px;line-height:1.4}
 #inst{display:none;align-items:center;gap:6px;padding:4px 8px;font-size:12px;line-height:1.3;background:rgba(255,212,0,.14);border-top:1px solid rgba(255,212,0,.35)}
 #inst span{flex:1}
@@ -40,17 +32,54 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 #hd{display:grid;grid-template-rows:1fr;transition:grid-template-rows .2s ease;position:relative;z-index:10;background:linear-gradient(180deg,#0e5236,#0a3a27);box-shadow:0 2px 10px rgba(0,0,0,.55)}
 #hd.hide{grid-template-rows:0fr}
 #hd>.hi{overflow:hidden;min-height:0}
-.r1{display:flex;align-items:center;gap:6px;padding:5px 8px 3px}
-.r1 .logo{font-size:18px;line-height:1}
-.tabs{flex:1;display:flex;gap:3px;background:rgba(0,0,0,.38);padding:3px;border-radius:12px;min-width:0}
-.tab{flex:1;min-width:0;border:0;background:transparent;color:#cfe8dc;padding:6px 2px;border-radius:9px;font-weight:800;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tab.on{background:var(--gold);color:#1a1a1a;box-shadow:0 1px 6px rgba(255,212,0,.4)}
-.adml{font-size:16px;text-decoration:none;background:rgba(0,0,0,.32);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
-.r2{display:flex;gap:5px;align-items:center;padding:3px 8px 4px}
-.r2 input{flex:1;min-width:0;height:32px;padding:0 12px;border-radius:16px;border:0;font-size:14px}
 .ib{background:#1d5b43;color:#fff;border:0;border-radius:16px;height:32px;min-width:32px;padding:0 9px;font-weight:700;font-size:12px;flex:none}
 .ib.link{display:none;align-items:center;justify-content:center;background:var(--gold);color:#1a1a1a;text-decoration:none;font-weight:800;font-size:12px;white-space:nowrap}
 .ib.full{background:var(--gold);color:#222;font-size:14px}
+
+/* ===== barra superiore + menu a scomparsa ===== */
+.r1{display:flex;align-items:center;gap:7px;padding:6px 8px 5px}
+.ham{position:relative;flex:none;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.32);color:#fff;font-size:19px}
+.ham.badge::after{content:"";position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px #0a3a27}
+.ttl{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{font-size:10px}
+.ib.sq{width:36px;height:36px;padding:0;border-radius:50%;font-size:15px}
+.ib.link{height:36px;border-radius:18px;padding:0 12px}
+.r2{display:none;gap:6px;align-items:center;padding:0 8px 6px}
+.r2 input{flex:1;min-width:0;height:34px;padding:0 14px;border-radius:17px;border:0;font-size:14px}
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.dov.open{opacity:1;pointer-events:auto}
+.drw{position:fixed;top:0;bottom:0;left:0;width:min(82vw,320px);z-index:45;display:flex;flex-direction:column;background:linear-gradient(180deg,#0e4a31,#071b12);padding-top:env(safe-area-inset-top,0px);transform:translateX(-104%);transition:transform .22s ease;box-shadow:4px 0 24px rgba(0,0,0,.6)}
+.drw.open{transform:none}
+.dh{display:flex;align-items:center;gap:8px;padding:16px 12px 14px 14px;border-bottom:1px solid var(--line)}
+.dl{display:flex;align-items:center;gap:12px;flex:1;min-width:0;user-select:none}
+.dl img{width:46px;height:46px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.dl b{font-size:17px;display:block;line-height:1.15}
+.dl small{opacity:.7;font-size:12px}
+.dx{background:transparent;border:0;color:#fff;font-size:22px;width:36px;height:36px}
+.dn{flex:1;overflow:auto;padding:8px}
+.di{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:0;color:var(--text);padding:13px 12px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;font-family:inherit;margin-bottom:2px}
+.di.on{background:rgba(255,212,0,.16);color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+.dsep{margin:14px 12px 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.5}
+.df{padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+#inst{display:none;align-items:center;gap:6px;padding:8px 10px;margin:8px 4px;font-size:12px;line-height:1.3;background:rgba(255,212,0,.14);border:1px solid rgba(255,212,0,.35);border-radius:12px}
+#inst span{flex:1}
+.chip{margin-left:8px;background:#1d5b43;color:#fff;border:0;border-radius:12px;padding:3px 10px;font-weight:700;font-size:11px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#0e4a31;color:#fff;border:1px solid var(--gold);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:80}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ===== area admin (schermata a parte) ===== */
+.modal{display:none;position:fixed;inset:0;z-index:60;background:#071b12;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px calc(env(safe-area-inset-bottom,0px) + 30px);font-size:13px}
+.modal.open{display:block}
+.mhd{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.mhd h2{margin:0;font-size:18px;flex:1}
+.mx{background:rgba(255,255,255,.12);border:0;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 12px 12px;margin:10px 0}
+.sec h3{margin:10px 0 2px;font-size:14px;color:var(--gold)}
+#adm label{display:block;margin:8px 0 2px;font-weight:700}
+#adm input,#adm select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
+#adm .hint{opacity:.8;margin:2px 0 4px;line-height:1.35}
+#adm details summary{font-weight:700;cursor:pointer;padding:8px 0}
+#a_msg{display:none;position:sticky;top:0;z-index:3;margin:8px 0;padding:9px 12px;border-radius:10px;background:#0e4a31;border:1px solid var(--gold);font-size:13px;line-height:1.4}
 
 /* avatar */
 .av{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;font-weight:900;color:#fff;flex:none;box-shadow:inset 0 -4px 8px rgba(0,0,0,.28),0 1px 3px rgba(0,0,0,.4)}
@@ -172,44 +201,67 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
 <body>
 <div id="hd"><div class="hi">
   <div class="r1">
-    <span class="logo">⚽</span>
-    <div class="tabs" id="tabs"></div>
-    <a href="#admin" id="lAdm" class="adml" title="Admin">🔧</a>
-  </div>
-  <div class="r2">
-    <input id="q" type="search" placeholder="🔍 Cerca partecipante...">
+    <button class="ham" id="bMenu" aria-label="Menu">☰</button>
+    <div class="ttl"><span id="ttl">Classifica finale</span><span id="dot" class="dot">⚪</span></div>
+    <button class="ib sq" id="bSrch" aria-label="Cerca">🔍</button>
     <a class="ib link" id="lForm" target="_blank" rel="noopener">📝 Pronostici</a>
-    <button class="ib" id="bDet">Turni ✓</button>
-    <button class="ib" id="bSet" title="Fogli">⚙️</button>
-    <button class="ib" id="bAdm" title="Risultati" style="display:none">✏️</button>
-    <button class="ib full" id="bFull" title="Schermo intero">⛶</button>
   </div>
-  <div id="set">
-  <div class="hint"><b>Facoltativo</b>: i fogli vengono riconosciuti in automatico. Usa questi campi solo se qualcosa non funziona.<br>Apri il Google Sheet, tocca ogni scheda in basso e guarda l'indirizzo: dopo <b>gid=</b> c'è il numero. Incolla qui il numero (o l'intero link).</div>
-  <label>Foglio Classifica finale</label><input id="g_finale" inputmode="text" placeholder="es. 123456789">
-  <label>Foglio Classifica intermedia</label><input id="g_intermedia" inputmode="text" placeholder="es. 987654321">
-  <label>Foglio Tabulato</label><input id="g_tabulato" inputmode="text" placeholder="es. 456789123">
-  <div style="margin-top:10px"><button class="b full" id="bSave">Salva e ricarica</button></div>
-</div>
-  <div id="adm">
-  <div class="hint">Area riservata: inserisci i risultati man mano che escono.</div>
-  <label>Partita</label><select id="a_m"></select>
-  <label>🎯 Risultato esatto</label>
-  <select id="a_r"><option value="">— scegli —</option><option value="0-0">0-0</option><option value="0-1">0-1</option><option value="0-2">0-2</option><option value="0-3">0-3</option><option value="0-4">0-4</option><option value="1-0">1-0</option><option value="1-1">1-1</option><option value="1-2">1-2</option><option value="1-3">1-3</option><option value="1-4">1-4</option><option value="2-0">2-0</option><option value="2-1">2-1</option><option value="2-2">2-2</option><option value="2-3">2-3</option><option value="2-4">2-4</option><option value="3-0">3-0</option><option value="3-1">3-1</option><option value="3-2">3-2</option><option value="3-3">3-3</option><option value="3-4">3-4</option><option value="4-0">4-0</option><option value="4-1">4-1</option><option value="4-2">4-2</option><option value="4-3">4-3</option><option value="4-4">4-4</option><option value="ALTRO">ALTRO</option><option value="-">-</option></select>
-  <label>Risultato finale (1 / X / 2) <small style="font-weight:400;opacity:.75">— "Automatico" lo ricava dal punteggio; con ALTRO sceglilo tu</small></label>
-  <select id="a_e"><option value="">Automatico</option><option value="1">1</option><option value="X">X</option><option value="2">2</option><option value="-">-</option></select>
-  <label>Password</label><input id="a_p" type="password" autocomplete="off">
-  <label>Indirizzo del modulo (Apps Script)</label><input id="a_u" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
-  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="b full" id="a_s">💾 Salva risultato</button><button class="b" id="a_c">🗑 Azzera partita</button></div>
-  <label>📝 Link del modulo pronostici (cambia ogni settimana)</label>
-  <input id="a_l" placeholder="https://forms.gle/..." autocomplete="off">
-  <div style="margin-top:8px"><button class="b" id="a_ls">🔗 Salva link pronostici</button></div>
-  <div id="a_msg"></div>
-</div>
-  <div id="inst"><span id="inst_t">📲 Aggiungi la pagina alla schermata Home</span><button class="ib full" id="inst_b">Installa</button><button class="ib" id="inst_x">✕</button></div>
-  <div id="info"></div>
+  <div class="r2" id="r2"><input id="q" type="search" placeholder="Cerca partecipante..."></div>
 </div></div>
 <div class="wrap" id="wrap"></div>
+
+<div class="dov" id="dov"></div>
+<aside class="drw" id="drw">
+  <div class="dh">
+    <div class="dl" id="dlogo"><img src="icon-192.png" alt="" onerror="this.style.display='none'"><div><b>Totoamici</b><small>Bar Tizzano · 2026-27</small></div></div>
+    <button class="dx" id="dClose" aria-label="Chiudi">✕</button>
+  </div>
+  <nav class="dn">
+    <button class="di on" data-go="0"><span>🏆</span>Classifica finale</button>
+    <button class="di" data-go="1"><span>📈</span>Classifica intermedia</button>
+    <button class="di" data-go="2"><span>📋</span>Tabulato</button>
+    <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
+    <div class="dsep">App</div>
+    <button class="di" id="dFull"><span>⛶</span>Schermo intero</button>
+    <div id="inst"><span id="inst_t">📲 Aggiungi la pagina alla schermata Home</span><button class="ib full" id="inst_b">Installa</button><button class="ib" id="inst_x">✕</button></div>
+    <div id="dAdmin" style="display:none">
+      <div class="dsep">Admin</div>
+      <button class="di" id="dAdm"><span>🔐</span>Area admin</button>
+      <button class="di" id="dLock"><span>🔒</span>Esci da admin</button>
+    </div>
+  </nav>
+  <div class="df"><div id="info"></div></div>
+</aside>
+
+<div id="adm" class="modal">
+  <div class="mhd"><h2>🔐 Area admin</h2><button class="mx" id="aClose" aria-label="Chiudi">✕</button></div>
+  <div id="a_msg"></div>
+  <div class="sec"><h3>Collegamento</h3>
+    <label>Indirizzo del modulo (Apps Script)</label><input id="a_u" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+    <label>Password</label><input id="a_p" type="password" autocomplete="off">
+  </div>
+  <div class="sec"><h3>Risultato partita</h3>
+    <label>Partita</label><select id="a_m"></select>
+    <label>🎯 Risultato esatto</label>
+    <select id="a_r"><option value="">— scegli —</option><option value="0-0">0-0</option><option value="0-1">0-1</option><option value="0-2">0-2</option><option value="0-3">0-3</option><option value="0-4">0-4</option><option value="1-0">1-0</option><option value="1-1">1-1</option><option value="1-2">1-2</option><option value="1-3">1-3</option><option value="1-4">1-4</option><option value="2-0">2-0</option><option value="2-1">2-1</option><option value="2-2">2-2</option><option value="2-3">2-3</option><option value="2-4">2-4</option><option value="3-0">3-0</option><option value="3-1">3-1</option><option value="3-2">3-2</option><option value="3-3">3-3</option><option value="3-4">3-4</option><option value="4-0">4-0</option><option value="4-1">4-1</option><option value="4-2">4-2</option><option value="4-3">4-3</option><option value="4-4">4-4</option><option value="ALTRO">ALTRO</option><option value="-">-</option></select>
+    <label>Risultato finale (1 / X / 2) <small style="font-weight:400;opacity:.75">— "Automatico" lo ricava dal punteggio; con ALTRO sceglilo tu</small></label>
+    <select id="a_e"><option value="">Automatico</option><option value="1">1</option><option value="X">X</option><option value="2">2</option><option value="-">-</option></select>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="b full" id="a_s">💾 Salva risultato</button><button class="b" id="a_c">🗑 Azzera partita</button></div>
+  </div>
+  <div class="sec"><h3>📝 Link modulo pronostici</h3>
+    <label>Cambia ogni settimana</label>
+    <input id="a_l" placeholder="https://forms.gle/..." autocomplete="off">
+    <div style="margin-top:10px"><button class="b" id="a_ls">🔗 Salva link pronostici</button></div>
+  </div>
+  <div class="sec"><details><summary>⚙️ Fogli (avanzato)</summary>
+    <div class="hint"><b>Facoltativo</b>: i fogli vengono riconosciuti in automatico. Usa questi campi solo se qualcosa non funziona. Apri il Google Sheet, tocca ogni scheda in basso: dopo <b>gid=</b> c'è il numero.</div>
+    <label>Foglio Classifica finale</label><input id="g_finale" inputmode="text" placeholder="es. 123456789">
+    <label>Foglio Classifica intermedia</label><input id="g_intermedia" inputmode="text" placeholder="es. 987654321">
+    <label>Foglio Tabulato</label><input id="g_tabulato" inputmode="text" placeholder="es. 456789123">
+    <div style="margin-top:10px"><button class="b full" id="bSave">Salva e ricarica</button></div>
+  </details></div>
+</div>
+<div id="toast"></div>
 
 <script>
 /* ==================== DATI (turno C4) ==================== */
@@ -283,11 +335,11 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbzY-cJGFbbDg2dgoUrsPuWj73aMWfI0xVREj8u59qmEFjO27p9RJjZNI0GjxSCjZBSk/exec",
+  WEBAPP: "",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio, nella cella indicata qui.
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 28, col: "B" },
-  FORM_URL: "https://docs.google.com/spreadsheets/d/1pbD6lWOEUiJMkm2dm6EgSSO9VMRGtZJ_GxKovbgw7oE/edit?resourcekey=&gid=1532242985#gid=1532242985"
+  FORM_URL: ""
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -349,6 +401,12 @@ function parseInter(rows){
   return d.length>=3 ? {turni:tc.map(c=>t(hr[c]).toUpperCase()), rows:d} : null;
 }
 
+function normLink(x){
+  x = t(x);
+  if(/^https?:\/\//i.test(x)) return x;
+  if(!/\s/.test(x) && /^(forms\.gle|docs\.google\.com\/forms|www\.|[\w-]+\.[\w.-]+\/)/i.test(x)) return "https://"+x;
+  return "";
+}
 function parseTab(rows){
   const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
   if(!mr.length) return null;
@@ -393,8 +451,12 @@ function parseTab(rows){
     pEsatto: iPE>=0 ? (toNum(after[iPE][c])??0) : 0,
     tot:    iT>=0 ? (toNum(after[iT][c])??0) : 0
   }));
-  const fr = rows[CONFIG.FORM.row-1] || [], fl = t(fr[colIdx(CONFIG.FORM.col)]);
-  return {partite, part, link: /^https?:\/\//i.test(fl) ? fl : "", dbg:{labelCol, resultCol, start}};
+  const fr = rows[CONFIG.FORM.row-1] || [], linkRaw = t(fr[colIdx(CONFIG.FORM.col)]);
+  let link = normLink(linkRaw);
+  if(!link){   /* se la cella non è quella attesa, cerco un link di Google Moduli in qualunque punto del foglio */
+    outer: for(const r of rows) for(const c of r){ const l = normLink(c); if(l && /forms\.gle|docs\.google\.com\/forms/i.test(l)){ link = l; break outer; } }
+  }
+  return {partite, part, link, linkRaw, dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -488,8 +550,13 @@ function ranked(list, f){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v21 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  let h = "v23 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
+  if(S.tabulato && S.tabulato.live && !curLink()){
+    const d = S.tabulato.data;
+    h += "<br>📝 Link pronostici: cella "+CONFIG.FORM.col+CONFIG.FORM.row+(d.linkRaw ? " contiene «"+esc(d.linkRaw.slice(0,40))+"», che non è un link utilizzabile (scrivilo come testo semplice, che inizi con https://)." : " vuota nel foglio pubblicato (se l'hai appena scritta aspetta qualche minuto).");
+  }
+  $("dot").textContent = s.live ? "🟢" : (S.err ? "⚠️" : "⚪");
   $("info").innerHTML = h;
 }
 const hue = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))%360; return h; };
@@ -505,6 +572,7 @@ function jollyCell(v){
 }
 
 const chipsOf = (r, d, mx, sm) => '<div class="tcs'+(sm?" sm":"")+'">' + r.x[1].map((v,k)=>`<div class="tc${v===mx[k] && v>0 ? " mx" : ""}"><small>${esc(d.turni[k])}</small><b>${v}</b></div>`).join("") + "</div>";
+function toggleDet(){ showDet = !showDet; render(); }
 function viewClassifica(){
   const q = norm($("q").value), d = S[KEYS[cur]].data;
   const isInt = cur===1;
@@ -521,7 +589,7 @@ function viewClassifica(){
     }).join("") + "</div>";
     list = all.slice(3);
   }
-  h += `<div class="cap">${isInt ? "Miglior punteggio di ogni turno in oro" : "J = jolly giocati"}</div>`;
+  h += `<div class="cap">${isInt ? 'Miglior punteggio di ogni turno in oro <button class="chip" onclick="toggleDet()">Turni ' + (showDet ? "✓" : "✗") + '</button>' : "J = jolly giocati"}</div>`;
   list.forEach(r=>{
     h += `<div class="rw${r.pos<=3?" p"+r.pos:""}"><div class="ps">${medal(r.pos)}</div>${av(r.x[0])}<div class="nm">${esc(r.x[0])}</div>`;
     if(isInt && showDet) h += chipsOf(r,d,mx,false);
@@ -667,8 +735,9 @@ function curLink(){
   return (d && d.link) || CONFIG.FORM_URL || "";
 }
 function updLink(){
-  const a = $("lForm"), u = curLink();
-  if(/^https?:\/\//i.test(u)){ a.href = u; a.style.display = "inline-flex"; } else a.style.display = "none";
+  const a = $("lForm"), d = $("dForm"), u = curLink(), ok = /^https?:\/\//i.test(u);
+  a.style.display = ok ? "inline-flex" : "none"; d.style.display = ok ? "flex" : "none";
+  if(ok){ a.href = u; d.href = u; }
 }
 async function sendLink(){
   const url = $("a_u").value.trim(), pwd = $("a_p").value, link = $("a_l").value.trim();
@@ -699,7 +768,7 @@ function fillAdm(){
   sel.innerHTML = labels.map((l,i)=>`<option value="${esc(l)}">${i+1} · ${esc(l)}</option>`).join("");
   if(labels.includes(prev)) sel.value = prev;
 }
-const admMsg = x => { $("a_msg").innerHTML = x; };
+const admMsg = x => { const m = $("a_msg"); m.innerHTML = x; m.style.display = x ? "block" : "none"; };
 async function sendRes(clear){
   const sel = $("a_m"), label = sel.value, url = $("a_u").value.trim(), pwd = $("a_p").value;
   const n = (sel.selectedIndex||0) + 1;
@@ -757,53 +826,78 @@ function initInstall(){
   const standalone=(window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone===true;
   let dismissed=false; try{ dismissed = localStorage.getItem("toto_inst")==="1"; }catch(e){}
   if(!mobile || standalone || dismissed) return;
+  const hide=()=>{ box.style.display="none"; const bm=$("bMenu"); if(bm) bm.classList.remove("badge"); };
   let dip=null;
   window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); dip=e; });
-  window.addEventListener("appinstalled", ()=>{ box.style.display="none"; });
-  box.style.display="flex";
+  window.addEventListener("appinstalled", ()=>{ hide(); });
+  box.style.display="flex"; { const bm=$("bMenu"); if(bm) bm.classList.add("badge"); }
   btn.onclick = async ()=>{
-    if(dip){ dip.prompt(); try{ await dip.userChoice; }catch(e){} dip=null; box.style.display="none"; return; }
+    if(dip){ dip.prompt(); try{ await dip.userChoice; }catch(e){} dip=null; hide(); return; }
     tx.innerHTML = ios
       ? "Tocca <b>Condividi</b> ⬆️ (in basso) e poi <b>Aggiungi alla schermata Home</b>. Se l'hai aperta da WhatsApp, prima apri il link in <b>Safari</b>."
       : "Tocca <b>⋮</b> (in alto a destra) e poi <b>Installa app</b> oppure <b>Aggiungi a schermata Home</b>. Se l'hai aperta da WhatsApp, prima apri il link in <b>Chrome</b>.";
     btn.style.display="none";
   };
-  x.onclick = ()=>{ box.style.display="none"; try{ localStorage.setItem("toto_inst","1"); }catch(e){} };
+  x.onclick = ()=>{ hide(); try{ localStorage.setItem("toto_inst","1"); }catch(e){} };
 }
 
 function render(){
   fillAdm(); updLink();
-  $("bDet").style.display = cur===1 ? "" : "none";
+  $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"][cur];
+  document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
   if(cur===2) viewTabulato(); else viewClassifica();
 }
 
 /*INIT*/
-["🏆 Finale","📈 Intermedia","📋 Tabulato"].forEach((label,i)=>{
-  const b = document.createElement("button");
-  b.className = "tab"+(i===0?" on":""); b.textContent = label;
-  b.onclick = ()=>{ cur=i; document.querySelectorAll(".tab").forEach((x,k)=>x.classList.toggle("on",k===i)); render(); $("wrap").scrollTo(0,0); };
-  $("tabs").appendChild(b);
-});
+function closeDrawer(){ $("drw").classList.remove("open"); $("dov").classList.remove("open"); }
+function openDrawer(){ $("drw").classList.add("open"); $("dov").classList.add("open"); }
+function go(i){ cur=i; closeDrawer(); render(); $("wrap").scrollTo(0,0); }
+function toast(m){ const el=$("toast"); el.textContent=m; el.classList.add("on"); clearTimeout(toast.h); toast.h=setTimeout(()=>el.classList.remove("on"),2600); }
+
+/* modalità admin: nascosta a tutti, si attiva solo su questo dispositivo (indirizzo con #admin oppure 5 tocchi sul logo nel menu) */
+let ADMIN=false; try{ ADMIN = localStorage.getItem("toto_admin")==="1"; }catch(e){}
+function setAdmin(on){ ADMIN=on; try{ localStorage.setItem("toto_admin", on?"1":"0"); }catch(e){} $("dAdmin").style.display = on ? "" : "none"; }
+function openAdm(){ setAdmin(true); closeDrawer(); $("adm").classList.add("open"); fillAdm(); }
+function closeAdm(){ $("adm").classList.remove("open"); }
+function checkHash(){
+  if(location.hash==="#admin"){ openAdm(); try{ history.replaceState(null,"",location.pathname+location.search); }catch(x){} }
+}
+
+document.querySelectorAll(".di[data-go]").forEach(b=>{ b.onclick = ()=>go(+b.dataset.go); });
+$("bMenu").onclick = openDrawer; $("dClose").onclick = closeDrawer; $("dov").onclick = closeDrawer;
+$("dForm").onclick = closeDrawer;
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeAdm(); } });
+$("bSrch").onclick = ()=>{
+  const r=$("r2"), open = r.style.display==="flex";
+  r.style.display = open ? "none" : "flex";
+  if(open){ $("q").value=""; render(); } else $("q").focus();
+};
 $("q").addEventListener("input", render);
-$("bDet").onclick = ()=>{ showDet=!showDet; $("bDet").textContent = showDet ? "Turni ✓" : "Turni ✗"; render(); };
-$("bFull").onclick = ()=>{ const el=document.documentElement;
+$("dFull").onclick = ()=>{ closeDrawer(); const el=document.documentElement;
   if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el); };
+
+let taps=[];
+$("dlogo").addEventListener("click", ()=>{
+  const n=Date.now(); taps = taps.filter(x=>n-x<4000); taps.push(n);
+  if(taps.length>=5){ taps=[]; setAdmin(true); toast("🔐 Modalità admin attivata su questo dispositivo"); }
+});
+$("dAdm").onclick = openAdm;
+$("dLock").onclick = ()=>{ setAdmin(false); closeAdm(); closeDrawer(); toast("🔒 Modalità admin disattivata"); };
+$("aClose").onclick = closeAdm;
+setAdmin(ADMIN);
+checkHash();
+window.addEventListener("hashchange", checkHash);
+
 const GKEYS = ["finale","intermedia","tabulato"];
 const cleanGid = v => { const m = String(v||"").match(/gid=(\d+)/) || String(v||"").match(/^\s*(\d+)\s*$/); return m ? m[1] : ""; };
 try{ const g = JSON.parse(localStorage.getItem("toto_gid")||"{}"); GKEYS.forEach(k=>{ if(g[k]) CONFIG.GID[k]=g[k]; }); }catch(e){}
 GKEYS.forEach(k=>{ $("g_"+k).value = CONFIG.GID[k]; });
-$("bSet").onclick = ()=>{ const p=$("set"); p.style.display = p.style.display==="block" ? "none" : "block"; };
 $("bSave").onclick = ()=>{
   GKEYS.forEach(k=>{ CONFIG.GID[k] = cleanGid($("g_"+k).value); $("g_"+k).value = CONFIG.GID[k]; });
   try{ localStorage.setItem("toto_gid", JSON.stringify(CONFIG.GID)); }catch(e){}
-  $("set").style.display = "none"; loadAll();
+  loadAll(); toast("✅ Fogli salvati");
 };
-function openAdm(){ $("bAdm").style.display = ""; $("adm").style.display = "block"; fillAdm(); }
-autoHide($("hd"), $("wrap"), ()=> $("set").style.display==="block" || $("adm").style.display==="block" || document.activeElement===$("q"));
-if(location.hash==="#admin") openAdm();
-window.addEventListener("hashchange", ()=>{ if(location.hash==="#admin") openAdm(); });
-$("lAdm").onclick = e=>{ e.preventDefault(); try{ history.replaceState(null,"","#admin"); }catch(x){} openAdm(); try{ window.scrollTo(0,0); }catch(x){} };
-$("bAdm").onclick = ()=>{ const a=$("adm"); a.style.display = a.style.display==="block" ? "none" : "block"; fillAdm(); };
+autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm").classList.contains("open") || document.activeElement===$("q"));
 $("a_s").onclick = ()=>sendRes(false);
 $("a_c").onclick = ()=>sendRes(true);
 $("a_ls").onclick = ()=>sendLink();
