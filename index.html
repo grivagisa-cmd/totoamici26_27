@@ -49,6 +49,7 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 .r2{display:flex;gap:5px;align-items:center;padding:3px 8px 4px}
 .r2 input{flex:1;min-width:0;height:32px;padding:0 12px;border-radius:16px;border:0;font-size:14px}
 .ib{background:#1d5b43;color:#fff;border:0;border-radius:16px;height:32px;min-width:32px;padding:0 9px;font-weight:700;font-size:12px;flex:none}
+.ib.link{display:none;align-items:center;justify-content:center;background:var(--gold);color:#1a1a1a;text-decoration:none;font-weight:800;font-size:12px;white-space:nowrap}
 .ib.full{background:var(--gold);color:#222;font-size:14px}
 
 /* avatar */
@@ -177,6 +178,7 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
   </div>
   <div class="r2">
     <input id="q" type="search" placeholder="🔍 Cerca partecipante...">
+    <a class="ib link" id="lForm" target="_blank" rel="noopener">📝 Pronostici</a>
     <button class="ib" id="bDet">Turni ✓</button>
     <button class="ib" id="bSet" title="Fogli">⚙️</button>
     <button class="ib" id="bAdm" title="Risultati" style="display:none">✏️</button>
@@ -199,6 +201,9 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
   <label>Password</label><input id="a_p" type="password" autocomplete="off">
   <label>Indirizzo del modulo (Apps Script)</label><input id="a_u" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
   <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="b full" id="a_s">💾 Salva risultato</button><button class="b" id="a_c">🗑 Azzera partita</button></div>
+  <label>📝 Link del modulo pronostici (cambia ogni settimana)</label>
+  <input id="a_l" placeholder="https://forms.gle/..." autocomplete="off">
+  <div style="margin-top:8px"><button class="b" id="a_ls">🔗 Salva link pronostici</button></div>
   <div id="a_msg"></div>
 </div>
   <div id="inst"><span id="inst_t">📲 Aggiungi la pagina alla schermata Home</span><button class="ib full" id="inst_b">Installa</button><button class="ib" id="inst_x">✕</button></div>
@@ -278,7 +283,11 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbzY-cJGFbbDg2dgoUrsPuWj73aMWfI0xVREj8u59qmEFjO27p9RJjZNI0GjxSCjZBSk/exec"
+  WEBAPP: "",
+  /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio, nella cella indicata qui.
+     Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
+  FORM: { row: 28, col: "B" },
+  FORM_URL: ""
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -384,7 +393,8 @@ function parseTab(rows){
     pEsatto: iPE>=0 ? (toNum(after[iPE][c])??0) : 0,
     tot:    iT>=0 ? (toNum(after[iT][c])??0) : 0
   }));
-  return {partite, part, dbg:{labelCol, resultCol, start}};
+  const fr = rows[CONFIG.FORM.row-1] || [], fl = t(fr[colIdx(CONFIG.FORM.col)]);
+  return {partite, part, link: /^https?:\/\//i.test(fl) ? fl : "", dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -478,7 +488,7 @@ function ranked(list, f){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v20 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  let h = "v21 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   $("info").innerHTML = h;
 }
@@ -649,6 +659,38 @@ function viewPartite(){
   infoLine(d.part.length);
 }
 
+let LINKOVR = null;
+try{ LINKOVR = JSON.parse(localStorage.getItem("toto_link")||"null"); }catch(e){}
+function curLink(){
+  if(LINKOVR && LINKOVR.u && Date.now()-LINKOVR.t < 15*60000) return LINKOVR.u;   /* appena salvato da qui: visibile subito */
+  const d = S.tabulato && S.tabulato.data;
+  return (d && d.link) || CONFIG.FORM_URL || "";
+}
+function updLink(){
+  const a = $("lForm"), u = curLink();
+  if(/^https?:\/\//i.test(u)){ a.href = u; a.style.display = "inline-flex"; } else a.style.display = "none";
+}
+async function sendLink(){
+  const url = $("a_u").value.trim(), pwd = $("a_p").value, link = $("a_l").value.trim();
+  if(!url){ admMsg("⚠️ Inserisci prima l'indirizzo del modulo (Apps Script)."); return; }
+  if(link && !/^https?:\/\//i.test(link)){ admMsg("⚠️ Il link deve iniziare con https://"); return; }
+  try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
+  const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&action=link&url="+encodeURIComponent(link);
+  admMsg("⏳ Invio…");
+  let note = "";
+  try{
+    const r = await fetch(q); const j = await r.json();
+    if(!j.ok){ admMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    note = "Link salvato nel foglio (cella "+esc(j.cell||"")+").";
+  }catch(e){
+    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio."; }
+    catch(e2){ admMsg("⚠️ Impossibile contattare il modulo: "+esc(e2.message)); return; }
+  }
+  LINKOVR = {u:link, t:Date.now()};
+  try{ localStorage.setItem("toto_link", JSON.stringify(LINKOVR)); }catch(e){}
+  render();
+  admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
+}
 function fillAdm(){
   const sel = $("a_m"); if(!sel || !S.tabulato) return;
   const labels = S.tabulato.data.partite.map(m=>m.label), sig = labels.join("|");
@@ -730,7 +772,7 @@ function initInstall(){
 }
 
 function render(){
-  fillAdm();
+  fillAdm(); updLink();
   $("bDet").style.display = cur===1 ? "" : "none";
   if(cur===2) viewTabulato(); else viewClassifica();
 }
@@ -764,6 +806,7 @@ $("lAdm").onclick = e=>{ e.preventDefault(); try{ history.replaceState(null,"","
 $("bAdm").onclick = ()=>{ const a=$("adm"); a.style.display = a.style.display==="block" ? "none" : "block"; fillAdm(); };
 $("a_s").onclick = ()=>sendRes(false);
 $("a_c").onclick = ()=>sendRes(true);
+$("a_ls").onclick = ()=>sendLink();
 try{ const g = JSON.parse(localStorage.getItem("toto_adm")||"{}"); $("a_u").value = g.u || CONFIG.WEBAPP; $("a_p").value = g.p||""; }catch(e){ $("a_u").value = CONFIG.WEBAPP; }
 if(!$("a_u").value) $("a_u").value = CONFIG.WEBAPP;
 try{ if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){}
