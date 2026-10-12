@@ -544,14 +544,15 @@ async function loadAll(){
 let cur = 0, showDet = true, tv = "p";
 const KEYS = ["finale","intermedia","tabulato"];
 const medal = pos => ["🥇","🥈","🥉"][pos-1] || pos;
-function ranked(list, f){
-  const s = list.slice().sort((a,b)=>f(b)-f(a));
+function ranked(list, f, nm){
+  /* punti dal più alto al più basso; a parità di punti, ordine alfabetico (senza distinguere maiuscole e minuscole) */
+  const s = list.slice().sort((a,b)=> f(b)-f(a) || String(nm(a)).localeCompare(String(nm(b)), "it", {sensitivity:"base"}));
   let pos=0, last=null;
   return s.map((x,i)=>{ const v=f(x); if(v!==last){pos=i+1; last=v} return {x,pos}; });
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v24 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  let h = "v25 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -578,7 +579,7 @@ function viewClassifica(){
   const q = norm($("q").value), d = S[KEYS[cur]].data;
   const isInt = cur===1;
   /* elenco in fila, numerato 1, 2, 3, 4… (la numerazione resta quella della classifica anche cercando un nome) */
-  const all = ranked(isInt ? d.rows : d, x=>isInt ? x[2] : x[1]).map((r,i)=>({...r, n:i+1}));
+  const all = ranked(isInt ? d.rows : d, x=>isInt ? x[2] : x[1], x=>x[0]).map((r,i)=>({...r, n:i+1}));
   const mx = isInt ? d.turni.map((_,k)=>Math.max(...d.rows.map(x=>x[1][k]))) : [];
   const ptsOf = r => isInt ? r.x[2] : r.x[1];
   const list = all.filter(r=>!q || norm(r.x[0]).includes(q));
