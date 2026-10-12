@@ -101,7 +101,8 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 /* righe classifica */
 .cap{font-size:11px;color:var(--mut);padding:6px 14px 0}
 .rw{display:flex;align-items:center;gap:8px;margin:6px 10px;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:14px}
-.rw .ps{width:28px;text-align:center;font-weight:900;font-size:15px;color:var(--mut);flex:none}
+.rw .ps{width:30px;text-align:center;font-weight:900;font-size:15px;color:var(--mut);flex:none}
+.rw.p1 .ps,.rw.p2 .ps,.rw.p3 .ps{color:#fff;font-size:17px}
 .rw .nm{flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rw .pt{font-weight:900;font-size:21px;color:var(--gold);min-width:36px;text-align:right}
 .rw .jk{min-width:40px;text-align:center;font-size:14px}
@@ -550,7 +551,7 @@ function ranked(list, f){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v23 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  let h = "v24 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -576,27 +577,19 @@ function toggleDet(){ showDet = !showDet; render(); }
 function viewClassifica(){
   const q = norm($("q").value), d = S[KEYS[cur]].data;
   const isInt = cur===1;
-  const all = ranked(isInt ? d.rows : d, x=>isInt ? x[2] : x[1]);
+  /* elenco in fila, numerato 1, 2, 3, 4… (la numerazione resta quella della classifica anche cercando un nome) */
+  const all = ranked(isInt ? d.rows : d, x=>isInt ? x[2] : x[1]).map((r,i)=>({...r, n:i+1}));
   const mx = isInt ? d.turni.map((_,k)=>Math.max(...d.rows.map(x=>x[1][k]))) : [];
   const ptsOf = r => isInt ? r.x[2] : r.x[1];
-  let list = all.filter(r=>!q || norm(r.x[0]).includes(q));
-  let h = "";
-  if(!q && all.length>=3){
-    const top = all.slice(0,3);
-    h += '<div class="pod">' + [1,0,2].map(i=>{
-      const r = top[i];
-      return `<div class="pc g${Math.min(r.pos,3)}"><div class="md">${medal(r.pos)}</div>${av(r.x[0])}<div class="n2">${esc(r.x[0])}</div><div class="p2">${ptsOf(r)}</div>${isInt ? (showDet ? chipsOf(r,d,mx,true) : "") : `<div class="j2">${jollyCell(r.x[2])}</div>`}</div>`;
-    }).join("") + "</div>";
-    list = all.slice(3);
-  }
-  h += `<div class="cap">${isInt ? 'Miglior punteggio di ogni turno in oro <button class="chip" onclick="toggleDet()">Turni ' + (showDet ? "✓" : "✗") + '</button>' : "J = jolly giocati"}</div>`;
+  const list = all.filter(r=>!q || norm(r.x[0]).includes(q));
+  let h = `<div class="cap">${isInt ? 'Miglior punteggio di ogni turno in oro <button class="chip" onclick="toggleDet()">Turni ' + (showDet ? "✓" : "✗") + '</button>' : "J = jolly giocati"}</div>`;
   list.forEach(r=>{
-    h += `<div class="rw${r.pos<=3?" p"+r.pos:""}"><div class="ps">${medal(r.pos)}</div>${av(r.x[0])}<div class="nm">${esc(r.x[0])}</div>`;
+    h += `<div class="rw${r.n<=3?" p"+r.n:""}"><div class="ps">${r.n}</div>${av(r.x[0])}<div class="nm">${esc(r.x[0])}</div>`;
     if(isInt && showDet) h += chipsOf(r,d,mx,false);
     if(!isInt) h += `<div class="jk">${jollyCell(r.x[2])}</div>`;
     h += `<div class="pt">${ptsOf(r)}</div></div>`;
   });
-  $("wrap").innerHTML = (list.length || h) ? h : '<div id="msg">Nessun partecipante trovato</div>';
+  $("wrap").innerHTML = list.length ? h : '<div id="msg">Nessun partecipante trovato</div>';
   infoLine(q ? list.length : all.length);
 }
 
