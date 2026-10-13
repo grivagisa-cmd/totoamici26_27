@@ -377,8 +377,24 @@ const S = {
   finale:     {live:false, data:FINALE},
   intermedia: {live:false, data:{turni:["C1","C2","C3","C4"], rows:INTERMEDIA.map(r=>[r[0],[r[1],r[2],r[3],r[4]],r[5]])}},
   tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",esito:""})), part:P0}},
-  err:"", time:"", sheets:[]
+  err:"", time:"", sheets:[], ready:false
 };
+/* ultimi dati letti dal foglio: usati solo se al prossimo avvio il foglio non risponde (mai mostrati prima della lettura) */
+function loadCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem("toto_cache")||"null"); if(!c) return;
+    ["finale","intermedia","tabulato"].forEach(k=>{ if(c[k]) S[k] = {live:false, cached:true, data:c[k]}; });
+    S.cacheT = c.t;
+  }catch(e){}
+}
+function saveCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem("toto_cache")||"{}");
+    ["finale","intermedia","tabulato"].forEach(k=>{ if(S[k].live) c[k] = S[k].data; });
+    c.t = Date.now();
+    localStorage.setItem("toto_cache", JSON.stringify(c));
+  }catch(e){}
+}
 
 /* ==================== LETTURA DAL FOGLIO ==================== */
 function headerRow(rows, re){ return rows.findIndex(r=>r.some(c=>re.test(t(c)))); }
@@ -502,7 +518,7 @@ function classify(rows){
   return null;
 }
 
-async function loadAll(){
+async function loadAllInner(){
   const KS = ["finale","intermedia","tabulato"], errs = [], fresh = {};
   const parsers = {finale:parseFinale, intermedia:parseInter, tabulato:parseTab};
   if(!S.map) S.map = {};
@@ -537,7 +553,13 @@ async function loadAll(){
   if(errs.length && S.discErr) S.sheets = [];   /* riprova la ricerca al prossimo giro */
   S.err = errs.join(" • ");
   S.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+  saveCache();
+  S.ready = true;
   render();
+}
+async function loadAll(){
+  try{ await loadAllInner(); }
+  finally{ if(!S.ready){ S.ready = true; render(); } }
 }
 
 /* ==================== VISTE ==================== */
@@ -552,13 +574,13 @@ function ranked(list, f, nm){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v25 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : "⚪ dati incorporati");
+  let h = "v26 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
     h += "<br>📝 Link pronostici: cella "+CONFIG.FORM.col+CONFIG.FORM.row+(d.linkRaw ? " contiene «"+esc(d.linkRaw.slice(0,40))+"», che non è un link utilizzabile (scrivilo come testo semplice, che inizi con https://)." : " vuota nel foglio pubblicato (se l'hai appena scritta aspetta qualche minuto).");
   }
-  $("dot").textContent = s.live ? "🟢" : (S.err ? "⚠️" : "⚪");
+  $("dot").textContent = s.live ? "🟢" : (s.cached ? "🕘" : (S.err ? "⚠️" : "⚪"));
   $("info").innerHTML = h;
 }
 const hue = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))%360; return h; };
@@ -839,6 +861,11 @@ function render(){
   fillAdm(); updLink();
   $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"][cur];
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
+  if(!S.ready){
+    $("wrap").innerHTML = '<div id="msg">⏳ Carico i dati aggiornati…</div>';
+    $("dot").textContent = "⏳"; $("info").textContent = "v26 · caricamento…";
+    return;
+  }
   if(cur===2) viewTabulato(); else viewClassifica();
 }
 
@@ -899,8 +926,10 @@ try{ const g = JSON.parse(localStorage.getItem("toto_adm")||"{}"); $("a_u").valu
 if(!$("a_u").value) $("a_u").value = CONFIG.WEBAPP;
 try{ if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){}
 initInstall();
+loadCache();
 render();
 loadAll(); setInterval(loadAll, CONFIG.REFRESH*1000);
+setTimeout(()=>{ if(!S.ready){ S.ready = true; render(); } }, 12000);   /* se il foglio non risponde entro 12 s mostro i dati salvati */
 </script>
 </body>
 </html>
