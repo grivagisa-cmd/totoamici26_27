@@ -169,6 +169,9 @@ table.tb{table-layout:fixed;border-collapse:separate;border-spacing:0;margin-bot
 .tb td.us.hit b{color:#1a1a1a}
 .tb td.miss{background:rgba(255,90,95,.14)!important}
 .tb td.miss b{color:#ffb4b4}
+.tb thead th.hj{background:linear-gradient(180deg,#8a3d00,#5a2800);color:#ffd9a8;font-weight:900;font-size:11px;letter-spacing:.06em;padding:6px 2px}
+.tb thead th.hj .jj{width:30px;height:30px;font-size:20px;display:flex;margin:0 auto 3px}
+.tb td.jo.on{background:rgba(240,106,0,.3)!important}
 .tb td.jo .si{background:#f06a00;color:#fff;border-radius:11px;padding:3px 8px;font-weight:800;font-size:12px}
 .tb td.pt{font-weight:900;font-size:18px;color:var(--gold)}
 
@@ -574,7 +577,7 @@ function ranked(list, f, nm){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v26 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v27 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -695,10 +698,10 @@ function viewPartecipanti(){
     "</details>";
   if(!part.length){ $("wrap").innerHTML = h+'<div id="msg">Nessun partecipante trovato</div>'; infoLine(0); return; }
   h += '<table class="tb"><colgroup><col style="width:150px">' + M.map(()=>'<col style="width:46px">').join("") +
-       '<col style="width:92px"><col style="width:82px"><col style="width:48px"><col style="width:48px"></colgroup>';
+       '<col style="width:92px"><col style="width:82px"><col style="width:60px"><col style="width:48px"></colgroup>';
   h += '<thead><tr><th class="nm">Partecipante<div class="rl">Risultato ▸</div></th>' +
        M.map((m,i)=>`<th><div class="mn">${i+1}</div><span class="sh">${esc(m.a)}</span><br><span class="sh">${esc(m.b)}</span><br><span class="e${m.shown?"":" no"}">${esc(m.shown||"–")}</span></th>`).join("") +
-       "<th>🎯 Risultato esatto</th><th>✅ Uscito</th><th>🃏</th><th>Pt</th></tr></thead><tbody>";
+       "<th>🎯 Risultato esatto</th><th>✅ Uscito</th><th class='hj'><span class='jj'>J</span><div>JOLLY</div></th><th>Pt</th></tr></thead><tbody>";
   part.forEach(({p,i})=>{
     const ex = exactOf(p, M);
     h += `<tr><td class="nm"><div class="nw">${av(p.nome)}<span class="tx"><small>#${i+1}</small>${esc(p.nome)}</span></div></td>`;
@@ -714,7 +717,7 @@ function viewPartecipanti(){
     h += `<td class="xx bn${cls}">${sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:""}<b>${esc(p.bonus||"–")}</b>` +
          (ex.hit ? "<small>✓ esatto</small>" : "") + "</td>";
     h += `<td class="xx us${ex.hit?" hit":""}">` + (out ? (sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:"") + `<b>${esc(out)}</b>` : '<span style="opacity:.3">–</span>') + "</td>";
-    h += `<td class="xx jo">${p.jolly==="SI"?'<span class="si">SÌ</span>':'<span style="opacity:.3">–</span>'}</td>`;
+    h += `<td class="xx jo${p.jolly==="SI"?" on":""}">${p.jolly==="SI"?'<span class="si">SÌ</span>':'<span style="opacity:.3">–</span>'}</td>`;
     h += `<td class="pt">${p.tot}</td></tr>`;
   });
   $("wrap").innerHTML = h+"</tbody></table>";
