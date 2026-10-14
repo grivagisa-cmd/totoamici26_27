@@ -67,6 +67,16 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#0e4a31;color:#fff;border:1px solid var(--gold);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:80}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* ===== tabulato nascosto ===== */
+.lock{margin:26px 14px;padding:24px 16px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.lock .lk{font-size:46px;line-height:1}
+.lock h2{margin:8px 0 4px;font-size:19px}
+.lock p{margin:4px 0;opacity:.85;font-size:14px;line-height:1.4}
+.prog{height:12px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden;margin:14px 8px 4px}
+.prog i{display:block;height:100%;background:var(--gold)}
+.lock .cnt{font-weight:800;color:var(--gold);font-size:15px}
+.lock .btnl{display:inline-block;background:var(--gold);color:#1a1a1a;text-decoration:none;font-weight:800;padding:12px 20px;border-radius:24px;margin-top:14px}
+.lock .adm{margin-top:16px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.3);font-size:12px;line-height:1.5;text-align:left}
 /* ===== area admin (schermata a parte) ===== */
 .modal{display:none;position:fixed;inset:0;z-index:60;background:#071b12;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px calc(env(safe-area-inset-bottom,0px) + 30px);font-size:13px}
 .modal.open{display:block}
@@ -223,7 +233,7 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
   <nav class="dn">
     <button class="di on" data-go="0"><span>🏆</span>Classifica finale</button>
     <button class="di" data-go="1"><span>📈</span>Classifica intermedia</button>
-    <button class="di" data-go="2"><span>📋</span>Tabulato</button>
+    <button class="di" data-go="2"><span id="ico2">📋</span>Tabulato</button>
     <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
     <div class="dsep">App</div>
     <button class="di" id="dFull"><span>⛶</span>Schermo intero</button>
@@ -256,6 +266,11 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
     <label>Cambia ogni settimana</label>
     <input id="a_l" placeholder="https://forms.gle/..." autocomplete="off">
     <div style="margin-top:10px"><button class="b" id="a_ls">🔗 Salva link pronostici</button></div>
+  </div>
+  <div class="sec"><h3>👁 Visibilità del tabulato</h3>
+    <div class="hint"><b>Automatico</b>: il tabulato resta nascosto e compare da solo quando tutti hanno consegnato tutti i pronostici. Se qualcuno non consegna, scegli <b>Mostra sempre</b>. Ricorda di rimettere <b>Automatico</b> quando parte il turno successivo.</div>
+    <select id="a_tm"><option value="auto">Automatico (quando consegnano tutti)</option><option value="show">Mostra sempre</option><option value="hide">Nascondi</option></select>
+    <div style="margin-top:10px"><button class="b" id="a_ts">👁 Salva visibilità</button></div>
   </div>
   <div class="sec"><details><summary>⚙️ Fogli (avanzato)</summary>
     <div class="hint"><b>Facoltativo</b>: i fogli vengono riconosciuti in automatico. Usa questi campi solo se qualcosa non funziona. Apri il Google Sheet, tocca ogni scheda in basso: dopo <b>gid=</b> c'è il numero.</div>
@@ -343,7 +358,9 @@ const CONFIG = {
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio, nella cella indicata qui.
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 28, col: "B" },
-  FORM_URL: "https://docs.google.com/spreadsheets/d/1pbD6lWOEUiJMkm2dm6EgSSO9VMRGtZJ_GxKovbgw7oE/edit?resourcekey=&gid=1532242985#gid=1532242985"
+  FORM_URL: "",
+  /* visibilità del tabulato: cella B29 del foglio (vuota o "auto" = compare da solo quando tutti hanno consegnato; "mostra" = sempre; "nascondi" = mai) */
+  TABMODE: { row: 29, col: "B" }
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -443,6 +460,7 @@ function parseTab(rows){
   let start = labelCol+1, resultCol = -1;
   const hc = t(nameRow[start]);
   if(hc==="" || /^c\d+$/i.test(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
+  const turno = /^c\d+$/i.test(hc) ? hc.toUpperCase() : "";
   const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
   if(cols.length<3) return null;
   const partite = blk.map(i=>{
@@ -476,7 +494,9 @@ function parseTab(rows){
   if(!link){   /* se la cella non è quella attesa, cerco un link di Google Moduli in qualunque punto del foglio */
     outer: for(const r of rows) for(const c of r){ const l = normLink(c); if(l && /forms\.gle|docs\.google\.com\/forms/i.test(l)){ link = l; break outer; } }
   }
-  return {partite, part, link, linkRaw, dbg:{labelCol, resultCol, start}};
+  const mraw = t((rows[CONFIG.TABMODE.row-1]||[])[colIdx(CONFIG.TABMODE.col)]).toLowerCase();
+  const mode = /^(mostra|sempre|visibile|s[iì]|show)/.test(mraw) ? "show" : (/^(nascondi|nascosto|no|hide)/.test(mraw) ? "hide" : "auto");
+  return {partite, part, link, linkRaw, turno, mode, dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -577,7 +597,7 @@ function ranked(list, f, nm){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v27 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v28 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -682,7 +702,11 @@ function outsBanner(M){
   if(!o.length) return "";
   return '<div class="outs">⚽ <b>Risultati usciti</b><br>' + o.map(m=>`<span class="oc">${esc(m.a)}–${esc(m.b)} <b>${esc(showOut(m.out))}</b></span>`).join("") + "</div>";
 }
-function viewTabulato(){ if(tv==="m") viewPartite(); else viewPartecipanti(); }
+function viewTabulato(){
+  const ti = tabInfo();
+  if(!ti.visible){ viewLock(ti); return; }
+  if(tv==="m") viewPartite(); else viewPartecipanti();
+}
 
 function viewPartecipanti(){
   const q = norm($("q").value), d = S.tabulato.data;
@@ -779,6 +803,46 @@ async function sendLink(){
   render();
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
 }
+let MODEOVR = null;
+try{ MODEOVR = JSON.parse(localStorage.getItem("toto_tabmode")||"null"); }catch(e){}
+/* il tabulato si vede solo se: modalità "mostra", oppure "auto" e tutti i partecipanti hanno compilato tutte le partite */
+function tabInfo(){
+  const d = S.tabulato.data;
+  const mode = (MODEOVR && Date.now()-MODEOVR.t < 15*60000) ? MODEOVR.m : (d.mode || "auto");
+  const missing = d.part.filter(p=>!(p.preds.length && p.preds.every(v=>/^[1X2]$/.test(v)))).map(p=>p.nome);
+  return {mode, missing, total:d.part.length, turno:d.turno||"", visible: mode==="show" || (mode==="auto" && missing.length===0)};
+}
+function viewLock(ti){
+  const done = ti.total - ti.missing.length, pct = ti.total ? Math.round(done*100/ti.total) : 0;
+  const u = curLink(), link = /^https?:\/\//i.test(u) ? u : "";
+  let h = '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(ti.turno)+' non ancora visibile</h2>';
+  h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti avranno consegnato i pronostici.</p>';
+  if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+done+' su '+ti.total+'</div>';
+  if(link) h += '<a class="btnl" href="'+esc(link)+'" target="_blank" rel="noopener">📝 Inserisci i pronostici</a>';
+  if(ADMIN && ti.missing.length) h += '<div class="adm"><b>Solo per te (admin) — mancano:</b><br>'+ti.missing.map(esc).join(", ")+'</div>';
+  $("wrap").innerHTML = h + '</div>';
+  infoLine(ti.total);
+}
+async function sendTabMode(){
+  const url = $("a_u").value.trim(), pwd = $("a_p").value, m = $("a_tm").value;
+  if(!url){ admMsg("⚠️ Inserisci prima l'indirizzo del modulo (Apps Script)."); return; }
+  try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
+  const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&action=tab&mode="+encodeURIComponent(m);
+  admMsg("⏳ Invio…");
+  let note = "";
+  try{
+    const r = await fetch(q); const j = await r.json();
+    if(!j.ok){ admMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    note = "Salvato nel foglio (cella "+esc(j.cell||"")+").";
+  }catch(e){
+    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio."; }
+    catch(e2){ admMsg("⚠️ Impossibile contattare il modulo: "+esc(e2.message)); return; }
+  }
+  MODEOVR = {m, t:Date.now()};
+  try{ localStorage.setItem("toto_tabmode", JSON.stringify(MODEOVR)); }catch(e){}
+  render();
+  admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
+}
 function fillAdm(){
   const sel = $("a_m"); if(!sel || !S.tabulato) return;
   const labels = S.tabulato.data.partite.map(m=>m.label), sig = labels.join("|");
@@ -863,6 +927,7 @@ function initInstall(){
 function render(){
   fillAdm(); updLink();
   $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"][cur];
+  $("ico2").textContent = tabInfo().visible ? "📋" : "🔒";
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
   if(!S.ready){
     $("wrap").innerHTML = '<div id="msg">⏳ Carico i dati aggiornati…</div>';
@@ -925,6 +990,7 @@ autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm"
 $("a_s").onclick = ()=>sendRes(false);
 $("a_c").onclick = ()=>sendRes(true);
 $("a_ls").onclick = ()=>sendLink();
+$("a_ts").onclick = ()=>sendTabMode();
 try{ const g = JSON.parse(localStorage.getItem("toto_adm")||"{}"); $("a_u").value = g.u || CONFIG.WEBAPP; $("a_p").value = g.p||""; }catch(e){ $("a_u").value = CONFIG.WEBAPP; }
 if(!$("a_u").value) $("a_u").value = CONFIG.WEBAPP;
 try{ if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){}
