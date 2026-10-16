@@ -89,6 +89,15 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 #adm input,#adm select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
 #adm .hint{opacity:.8;margin:2px 0 4px;line-height:1.35}
 #adm details summary{font-weight:700;cursor:pointer;padding:8px 0}
+#ris label{display:block;margin:8px 0 2px;font-weight:700}
+#ris input,#ris select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
+#ris .hint{opacity:.8;margin:2px 0 4px;line-height:1.35}
+#r_msg{display:none;position:sticky;top:0;z-index:3;margin:8px 0;padding:9px 12px;border-radius:10px;background:#0e4a31;border:1px solid var(--gold);font-size:13px;line-height:1.4}
+table.rt tr.tap{cursor:pointer}
+table.rt tr.tap:active td,table.rt tr.sel td{background:rgba(255,212,0,.13)}
+table.lg td.wh{font-size:11px;opacity:.9;white-space:nowrap}
+table.rt tr.ed td{padding:6px 10px 14px;background:rgba(255,212,0,.07)}
+.edb{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 #a_msg{display:none;position:sticky;top:0;z-index:3;margin:8px 0;padding:9px 12px;border-radius:10px;background:#0e4a31;border:1px solid var(--gold);font-size:13px;line-height:1.4}
 
 /* avatar */
@@ -235,6 +244,7 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
     <button class="di" data-go="1"><span>📈</span>Classifica intermedia</button>
     <button class="di" data-go="2"><span id="ico2">📋</span>Tabulato</button>
     <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
+    <button class="di" id="dRis"><span>⚽</span>Inserisci risultati</button>
     <div class="dsep">App</div>
     <button class="di" id="dFull"><span>⛶</span>Schermo intero</button>
     <div id="inst"><span id="inst_t">📲 Aggiungi la pagina alla schermata Home</span><button class="ib full" id="inst_b">Installa</button><button class="ib" id="inst_x">✕</button></div>
@@ -279,6 +289,19 @@ details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
     <label>Foglio Tabulato</label><input id="g_tabulato" inputmode="text" placeholder="es. 456789123">
     <div style="margin-top:10px"><button class="b full" id="bSave">Salva e ricarica</button></div>
   </details></div>
+</div>
+<div id="ris" class="modal">
+  <div class="mhd"><h2>⚽ Inserisci risultati</h2><button class="mx" id="rClose" aria-label="Chiudi">✕</button></div>
+  <div id="r_msg"></div>
+  <div class="sec"><h3>Chi sei</h3>
+    <label>Partecipante</label><select id="r_who"></select>
+    <label>Il tuo codice</label><input id="r_code" type="password" autocomplete="off" placeholder="codice ricevuto dall'organizzatore">
+    <div class="hint">Ogni risultato inserito viene registrato con il tuo nome e l'orario.</div>
+  </div>
+  <div class="sec"><h3>Partite</h3>
+    <div class="hint">Tocca una riga per inserire o correggere il risultato.</div>
+    <div class="lgw" id="r_tab"></div>
+  </div>
 </div>
 <div id="toast"></div>
 
@@ -363,7 +386,10 @@ const CONFIG = {
   TABMODE: { row: 29, col: "B" },
   /* numero di partecipanti da attendere: il tabulato compare (modalità automatica) solo quando TUTTI hanno consegnato.
      Mettilo a 0 per usare invece il numero di nomi presenti nelle classifiche. */
-  PARTECIPANTI: 44
+  PARTECIPANTI: 44,
+  /* chi ha inserito il risultato di ogni partita (D27:Q27) e indirizzo del modulo (B30): li scrive lo script */
+  WHO: { row: 59, col: "D" },
+  WEBAPPCELL: { row: 60, col: "B" }
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -399,7 +425,7 @@ PAGINE.forEach(pg=>{
 const S = {
   finale:     {live:false, data:FINALE},
   intermedia: {live:false, data:{turni:["C1","C2","C3","C4"], rows:INTERMEDIA.map(r=>[r[0],[r[1],r[2],r[3],r[4]],r[5]])}},
-  tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",esito:""})), part:P0}},
+  tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",who:"",esito:""})), part:P0}},
   err:"", time:"", sheets:[], ready:false
 };
 /* ultimi dati letti dal foglio: usati solo se al prossimo avvio il foglio non risponde (mai mostrati prima della lettura) */
@@ -477,6 +503,8 @@ function parseTab(rows){
   });
   const exRow = rows[CONFIG.EXACT.row-1] || [], ec0 = colIdx(CONFIG.EXACT.col);
   partite.forEach((m,k)=>{ m.ex = t(exRow[ec0+k]); });
+  const whoRow = rows[CONFIG.WHO.row-1] || [], wc0 = colIdx(CONFIG.WHO.col);
+  partite.forEach((m,k)=>{ m.who = t(whoRow[wc0+k]); });
   const after = rows.slice(last+1);
   const lab = r => r.slice(0,start).map(t).join(" ").toLowerCase();
   const find = (re,not) => after.findIndex(r=>{ const l=lab(r); return re.test(l) && !(not && not.test(l)); });
@@ -499,7 +527,9 @@ function parseTab(rows){
   }
   const mraw = t((rows[CONFIG.TABMODE.row-1]||[])[colIdx(CONFIG.TABMODE.col)]).toLowerCase();
   const mode = /^(mostra|sempre|visibile|s[iì]|show)/.test(mraw) ? "show" : (/^(nascondi|nascosto|no|hide)/.test(mraw) ? "hide" : "auto");
-  return {partite, part, link, linkRaw, turno, mode, dbg:{labelCol, resultCol, start}};
+  const wl = t((rows[CONFIG.WEBAPPCELL.row-1]||[])[colIdx(CONFIG.WEBAPPCELL.col)]);
+  const webapp = /^https:\/\/script\.google\.com\//i.test(wl) ? wl : "";
+  return {partite, part, link, linkRaw, turno, mode, webapp, dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -600,7 +630,7 @@ function ranked(list, f, nm){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v29 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v30 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -680,10 +710,12 @@ try{ OVR = JSON.parse(localStorage.getItem("toto_res")||"{}"); }catch(e){}
 const esitoFromScore = x => { const m = sc2(x).match(/^(\d+)-(\d+)$/); return m ? (+m[1]>+m[2] ? "1" : (+m[1]<+m[2] ? "2" : "X")) : ""; };
 function buildM(d){
   const M = d.partite.map(m=>({...m, ...splitMatch(m.label), out: isOut(m.ex) ? showOut(m.ex) : (isOut(m.ris) ? showOut(m.ris) : "")}));
-  M.forEach(m=>{   /* risultato inserito da qui, visibile subito su questo dispositivo */
+  M.forEach(m=>{   /* risultato appena inserito da questo dispositivo: per 15 minuti prevale su quanto letto dal foglio, così lo vedi subito */
     const o = OVR[m.label]; if(!o || typeof o!=="object") return;
-    if(!m.out && isOut(o.x)) m.out = showOut(o.x);
-    if(!m.esito && /^[1X2]$/.test(t(o.e).toUpperCase())) m.esito = t(o.e).toUpperCase();
+    if(!(o.t && Date.now()-o.t < 15*60000)) return;
+    m.out = isOut(o.x) ? showOut(o.x) : "";
+    m.esito = /^[1X2]$/.test(t(o.e).toUpperCase()) ? t(o.e).toUpperCase() : "";
+    m.who = o.w || "";
   });
   M.forEach(m=>{ m.hasEsito = !!m.esito; });   /* esito 1/X/2 realmente presente (colonna C o inserito da qui) */
   const votes = M.map(()=>new Set());
@@ -718,8 +750,8 @@ function viewPartecipanti(){
   let h = seg() + hitsBanner(d, M) + outsBanner(M);
   const winners = M.map(()=>[]);
   d.part.forEach(p=>{ const e = exactOf(p,M); if(e.hit && e.k>=0) winners[e.k].push(p.nome); });
-  h += '<details class="leg"><summary>📅 Partite e risultati</summary><div class="lgw"><table class="lg"><thead><tr><th>#</th><th>Partita</th><th>Esito</th><th>🎯 Esatto</th><th>Indovinato da</th></tr></thead><tbody>' +
-    M.map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m.when)}<br><b>${esc(m.teams)}</b></td><td class="r">${esc(m.esito||(is1x2(m.ris)?m.ris.toUpperCase():"–"))}</td><td class="r x">${m.out ? esc(showOut(m.out)) : "–"}</td><td>${winners[i].length ? winners[i].map(esc).join(", ") : '<span style="opacity:.4">–</span>'}</td></tr>`).join("") +
+  h += '<details class="leg"><summary>📅 Partite e risultati</summary><div class="lgw"><table class="lg"><thead><tr><th>#</th><th>Partita</th><th>Esito</th><th>🎯 Esatto</th><th>Inserito da</th><th>Indovinato da</th></tr></thead><tbody>' +
+    M.map((m,i)=>`<tr><td>${i+1}</td><td>${esc(m.when)}<br><b>${esc(m.teams)}</b></td><td class="r">${esc(m.esito||(is1x2(m.ris)?m.ris.toUpperCase():"–"))}</td><td class="r x">${m.out ? esc(showOut(m.out)) : "–"}</td><td class="wh">${m.who ? esc(m.who) : '<span style="opacity:.4">–</span>'}</td><td>${winners[i].length ? winners[i].map(esc).join(", ") : '<span style="opacity:.4">–</span>'}</td></tr>`).join("") +
     "</tbody></table></div>" +
     (M.some(m=>m.out) ? "" : '<div class="dbg">ℹ️ Nessun punteggio esatto trovato nel foglio. ' + (d.dbg ? ("Esiti letti (C3:C16): "+esc(M.map(m=>m.raw===""||m.raw==null?"∅":m.raw).join(" ")) + "<br>Risultati esatti letti ("+esc(CONFIG.EXACT.col)+esc(CONFIG.EXACT.row)+" e seguenti): "+esc(M.map(m=>m.ex===""||m.ex==null?"∅":m.ex).join(" | "))) : "Dati incorporati: collegati al foglio compariranno qui.") + "</div>") +
     "</details>";
@@ -786,7 +818,7 @@ function updLink(){
   if(ok){ a.href = u; d.href = u; }
 }
 async function sendLink(){
-  const url = $("a_u").value.trim(), pwd = $("a_p").value, link = $("a_l").value.trim();
+  const url = ($("a_u").value.trim() || webappUrl()), pwd = $("a_p").value, link = $("a_l").value.trim();
   if(!url){ admMsg("⚠️ Inserisci prima l'indirizzo del modulo (Apps Script)."); return; }
   if(link && !/^https?:\/\//i.test(link)){ admMsg("⚠️ Il link deve iniziare con https://"); return; }
   try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
@@ -806,6 +838,7 @@ async function sendLink(){
   render();
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
 }
+function webappUrl(){ const d = S.tabulato && S.tabulato.data; return CONFIG.WEBAPP || (d && d.webapp) || ""; }
 let MODEOVR = null;
 try{ MODEOVR = JSON.parse(localStorage.getItem("toto_tabmode")||"null"); }catch(e){}
 /* il tabulato si vede solo se: modalità "mostra", oppure "auto" e tutti i partecipanti hanno compilato tutte le partite */
@@ -838,7 +871,7 @@ function viewLock(ti){
   infoLine(ti.expected);
 }
 async function sendTabMode(){
-  const url = $("a_u").value.trim(), pwd = $("a_p").value, m = $("a_tm").value;
+  const url = ($("a_u").value.trim() || webappUrl()), pwd = $("a_p").value, m = $("a_tm").value;
   if(!url){ admMsg("⚠️ Inserisci prima l'indirizzo del modulo (Apps Script)."); return; }
   try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
   const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&action=tab&mode="+encodeURIComponent(m);
@@ -857,6 +890,79 @@ async function sendTabMode(){
   render();
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
 }
+/* ===== inserimento dei risultati da parte dei partecipanti (tracciato: orario e nome) ===== */
+let EDIT = -1, ME = {n:"", c:""};
+try{ ME = Object.assign(ME, JSON.parse(localStorage.getItem("toto_me")||"{}")); }catch(e){}
+const SCORES = []; for(let a=0;a<=4;a++) for(let b=0;b<=4;b++) SCORES.push(a+"-"+b);
+const xOpts = sel => '<option value="">— scegli —</option>' + SCORES.concat(["ALTRO","-"]).map(v=>`<option value="${v}"${v===sel?" selected":""}>${v}</option>`).join("");
+const eOpts = sel => [["","Automatico"],["1","1"],["X","X"],["2","2"],["-","-"]].map(([v,l])=>`<option value="${v}"${v===sel?" selected":""}>${l}</option>`).join("");
+const risMsg = x => { const m = $("r_msg"); m.innerHTML = x; m.style.display = x ? "block" : "none"; };
+const nowWho = n => new Date().toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(",","") + " · " + n;
+function rosterNames(){
+  const out = [], seen = new Set();
+  const add = n => { const k = norm(n||""); if(k && !seen.has(k)){ seen.add(k); out.push(n); } };
+  S.tabulato.data.part.forEach(p=>add(p.nome));
+  (Array.isArray(S.finale.data) ? S.finale.data : []).forEach(r=>add(r[0]));
+  ((S.intermedia.data||{}).rows||[]).forEach(r=>add(r[0]));
+  return out.sort((a,b)=>a.localeCompare(b,"it",{sensitivity:"base"}));
+}
+function renderRis(){
+  const M = buildM(S.tabulato.data), sel = $("r_who"), names = rosterNames(), sig = names.join("|");
+  if(sel.dataset.sig !== sig){
+    sel.dataset.sig = sig;
+    sel.innerHTML = '<option value="">— scegli il tuo nome —</option>' + names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    if(ME.n && names.includes(ME.n)) sel.value = ME.n;
+  }
+  let h = '<table class="lg rt"><thead><tr><th>#</th><th>Partita</th><th>Esito</th><th>🎯 Esatto</th><th>Inserito da</th></tr></thead><tbody>';
+  M.forEach((m,i)=>{
+    h += `<tr class="tap${EDIT===i?" sel":""}" onclick="editRow(${i})"><td>${i+1}</td><td>${esc(m.when)}<br><b>${esc(m.teams)}</b> ✏️</td><td class="r">${esc(m.esito||"–")}</td><td class="r x">${m.out ? esc(showOut(m.out)) : "–"}</td><td class="wh">${m.who ? esc(m.who) : "–"}</td></tr>`;
+    if(EDIT===i){
+      const xs = m.out ? (isAltro(m.out) ? "ALTRO" : m.out) : "", es = (m.out && isAltro(m.out)) ? (m.esito||"") : "";
+      h += `<tr class="ed"><td colspan="5"><label>🎯 Risultato esatto</label><select id="r_x">${xOpts(xs)}</select>` +
+           `<label>Risultato finale (1 / X / 2) <small style="font-weight:400;opacity:.75">— con "Automatico" lo ricavo dal punteggio; con ALTRO sceglilo tu</small></label><select id="r_e">${eOpts(es)}</select>` +
+           `<div class="edb"><button class="b full" onclick="saveRis(${i},false)">💾 Salva</button><button class="b" onclick="saveRis(${i},true)">🗑 Azzera</button><button class="b" onclick="editRow(-1)">Annulla</button></div></td></tr>`;
+    }
+  });
+  $("r_tab").innerHTML = h + "</tbody></table>";
+}
+function editRow(i){ EDIT = (EDIT===i) ? -1 : i; renderRis(); }
+function openRis(){
+  closeDrawer(); $("ris").classList.add("open"); $("r_code").value = ME.c || ""; EDIT = -1; renderRis();
+  risMsg(webappUrl() ? "" : "ℹ️ L'inserimento non è ancora attivo: manca l'indirizzo del modulo (lo imposta l'organizzatore).");
+}
+function closeRis(){ $("ris").classList.remove("open"); EDIT = -1; }
+async function saveRis(i, clear){
+  const M = buildM(S.tabulato.data), m = M[i];
+  const who = $("r_who").value, code = t($("r_code").value), url = webappUrl();
+  if(!url){ risMsg("⚠️ Funzione non ancora attiva: manca l'indirizzo del modulo (lo imposta l'organizzatore)."); return; }
+  if(!who){ risMsg("⚠️ Scegli prima il tuo nome."); return; }
+  if(!code){ risMsg("⚠️ Inserisci il tuo codice."); return; }
+  let x = clear ? "-" : t($("r_x").value), ev = clear ? "-" : t($("r_e").value).toUpperCase();
+  if(!clear){
+    if(!x){ risMsg("⚠️ Scegli il risultato esatto (anche solo il trattino)."); return; }
+    if(!ev){
+      if(x==="-") ev = "-";
+      else if(x==="ALTRO"){ risMsg("⚠️ Con ALTRO scegli anche l'esito (1, X, 2 oppure -)."); return; }
+      else ev = esitoFromScore(x);
+    }
+  }
+  ME = {n:who, c:code}; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(e){}
+  const q = url + (url.includes("?") ? "&" : "?") + "action=res&who="+encodeURIComponent(who)+"&code="+encodeURIComponent(code)+"&label="+encodeURIComponent(m.label)+"&n="+(i+1)+"&x="+encodeURIComponent(x)+"&e="+encodeURIComponent(ev);
+  risMsg("⏳ Invio…");
+  let whoTxt = "", note = "";
+  try{
+    const r = await fetch(q); const j = await r.json();
+    if(!j.ok){ risMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    whoTxt = (x==="-" && ev==="-") ? "" : (j.who || ""); note = "Salvato.";
+  }catch(err){
+    try{ await fetch(q, {mode:"no-cors"}); whoTxt = (x==="-" && ev==="-") ? "" : nowWho(who); note = "Inviato, ma il server non ha dato conferma: controlla che compaia in tabella."; }
+    catch(err2){ risMsg("⚠️ Impossibile contattare il modulo: "+esc(err2.message)); return; }
+  }
+  OVR[m.label] = {x, e:ev, w:whoTxt, t:Date.now()};
+  try{ localStorage.setItem("toto_res", JSON.stringify(OVR)); }catch(e){}
+  EDIT = -1; render(); renderRis();
+  risMsg("✅ "+note+" Registrato a nome di <b>"+esc(who)+"</b>. Gli altri lo vedranno appena Google aggiorna il foglio (di solito pochi minuti).");
+}
 function fillAdm(){
   const sel = $("a_m"); if(!sel || !S.tabulato) return;
   const labels = S.tabulato.data.partite.map(m=>m.label), sig = labels.join("|");
@@ -867,7 +973,7 @@ function fillAdm(){
 }
 const admMsg = x => { const m = $("a_msg"); m.innerHTML = x; m.style.display = x ? "block" : "none"; };
 async function sendRes(clear){
-  const sel = $("a_m"), label = sel.value, url = $("a_u").value.trim(), pwd = $("a_p").value;
+  const sel = $("a_m"), label = sel.value, url = ($("a_u").value.trim() || webappUrl()), pwd = $("a_p").value;
   const n = (sel.selectedIndex||0) + 1;
   let res = clear ? "-" : t($("a_r").value);
   if(/^altro$/i.test(res)) res = "ALTRO";
@@ -885,16 +991,17 @@ async function sendRes(clear){
   try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
   const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&label="+encodeURIComponent(label)+"&n="+n+"&x="+encodeURIComponent(res)+"&e="+encodeURIComponent(es);
   admMsg("⏳ Invio…");
-  let note = "";
+  let note = "", whoTxt = "";
   try{
     const r = await fetch(q); const j = await r.json();
     if(!j.ok){ admMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
     note = "Salvato nel foglio: esito in riga "+j.row+", risultato esatto in "+esc(j.exact||"")+".";
+    whoTxt = (res==="-" && es==="-") ? "" : (j.who || "");
   }catch(e){
-    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio."; }
+    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio."; whoTxt = (res==="-" && es==="-") ? "" : nowWho("Admin"); }
     catch(e2){ admMsg("⚠️ Impossibile contattare il modulo: "+esc(e2.message)); return; }
   }
-  if(clear || (res==="-" && es==="-")) delete OVR[label]; else OVR[label] = {x:res, e:es};
+  OVR[label] = {x:res, e:es, w:whoTxt, t:Date.now()};
   try{ localStorage.setItem("toto_res", JSON.stringify(OVR)); }catch(e){}
   render();
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
@@ -940,6 +1047,7 @@ function initInstall(){
 
 function render(){
   fillAdm(); updLink();
+  if($("ris").classList.contains("open") && EDIT<0) renderRis();
   $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"][cur];
   $("ico2").textContent = tabInfo().visible ? "📋" : "🔒";
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
@@ -969,7 +1077,7 @@ function checkHash(){
 document.querySelectorAll(".di[data-go]").forEach(b=>{ b.onclick = ()=>go(+b.dataset.go); });
 $("bMenu").onclick = openDrawer; $("dClose").onclick = closeDrawer; $("dov").onclick = closeDrawer;
 $("dForm").onclick = closeDrawer;
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeAdm(); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeAdm(); closeRis(); } });
 $("bSrch").onclick = ()=>{
   const r=$("r2"), open = r.style.display==="flex";
   r.style.display = open ? "none" : "flex";
@@ -987,6 +1095,7 @@ $("dlogo").addEventListener("click", ()=>{
 $("dAdm").onclick = openAdm;
 $("dLock").onclick = ()=>{ setAdmin(false); closeAdm(); closeDrawer(); toast("🔒 Modalità admin disattivata"); };
 $("aClose").onclick = closeAdm;
+$("dRis").onclick = openRis; $("rClose").onclick = closeRis;
 setAdmin(ADMIN);
 checkHash();
 window.addEventListener("hashchange", checkHash);
@@ -1000,7 +1109,7 @@ $("bSave").onclick = ()=>{
   try{ localStorage.setItem("toto_gid", JSON.stringify(CONFIG.GID)); }catch(e){}
   loadAll(); toast("✅ Fogli salvati");
 };
-autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm").classList.contains("open") || document.activeElement===$("q"));
+autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm").classList.contains("open") || $("ris").classList.contains("open") || document.activeElement===$("q"));
 $("a_s").onclick = ()=>sendRes(false);
 $("a_c").onclick = ()=>sendRes(true);
 $("a_ls").onclick = ()=>sendLink();
