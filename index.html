@@ -360,7 +360,10 @@ const CONFIG = {
   FORM: { row: 28, col: "B" },
   FORM_URL: "",
   /* visibilità del tabulato: cella B29 del foglio (vuota o "auto" = compare da solo quando tutti hanno consegnato; "mostra" = sempre; "nascondi" = mai) */
-  TABMODE: { row: 29, col: "B" }
+  TABMODE: { row: 29, col: "B" },
+  /* numero di partecipanti da attendere: il tabulato compare (modalità automatica) solo quando TUTTI hanno consegnato.
+     Mettilo a 0 per usare invece il numero di nomi presenti nelle classifiche. */
+  PARTECIPANTI: 44
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -597,7 +600,7 @@ function ranked(list, f, nm){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v28 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v29 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -809,19 +812,30 @@ try{ MODEOVR = JSON.parse(localStorage.getItem("toto_tabmode")||"null"); }catch(
 function tabInfo(){
   const d = S.tabulato.data;
   const mode = (MODEOVR && Date.now()-MODEOVR.t < 15*60000) ? MODEOVR.m : (d.mode || "auto");
-  const missing = d.part.filter(p=>!(p.preds.length && p.preds.every(v=>/^[1X2]$/.test(v)))).map(p=>p.nome);
-  return {mode, missing, total:d.part.length, turno:d.turno||"", visible: mode==="show" || (mode==="auto" && missing.length===0)};
+  /* ha consegnato chi ha compilato tutte le partite */
+  const done = new Set(d.part.filter(p=>p.preds.length && p.preds.every(v=>/^[1X2]$/.test(v))).map(p=>norm(p.nome)));
+  /* elenco di tutti i partecipanti: classifiche + colonne del tabulato (anche chi non ha ancora una colonna) */
+  const roster = [], seen = new Set();
+  const add = n => { const k = norm(n||""); if(k && !seen.has(k)){ seen.add(k); roster.push(n); } };
+  (Array.isArray(S.finale.data) ? S.finale.data : []).forEach(r=>add(r[0]));
+  ((S.intermedia.data||{}).rows||[]).forEach(r=>add(r[0]));
+  d.part.forEach(p=>add(p.nome));
+  const expected = CONFIG.PARTECIPANTI > 0 ? CONFIG.PARTECIPANTI : roster.length;
+  const delivered = done.size;
+  const missing = roster.filter(n=>!done.has(norm(n)));
+  return {mode, delivered, expected, total:expected, missing, unknown:Math.max(0, expected-roster.length), turno:d.turno||"",
+          visible: mode==="show" || (mode==="auto" && delivered>=expected)};
 }
 function viewLock(ti){
-  const done = ti.total - ti.missing.length, pct = ti.total ? Math.round(done*100/ti.total) : 0;
+  const pct = ti.expected ? Math.min(100, Math.round(ti.delivered*100/ti.expected)) : 0;
   const u = curLink(), link = /^https?:\/\//i.test(u) ? u : "";
   let h = '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(ti.turno)+' non ancora visibile</h2>';
-  h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti avranno consegnato i pronostici.</p>';
-  if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+done+' su '+ti.total+'</div>';
+  h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti i '+ti.expected+' partecipanti avranno consegnato i pronostici.</p>';
+  if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+ti.delivered+' su '+ti.expected+'</div>';
   if(link) h += '<a class="btnl" href="'+esc(link)+'" target="_blank" rel="noopener">📝 Inserisci i pronostici</a>';
-  if(ADMIN && ti.missing.length) h += '<div class="adm"><b>Solo per te (admin) — mancano:</b><br>'+ti.missing.map(esc).join(", ")+'</div>';
+  if(ADMIN && (ti.missing.length || ti.unknown)) h += '<div class="adm"><b>Solo per te (admin) — mancano '+Math.max(0, ti.expected-ti.delivered)+':</b><br>'+ti.missing.map(esc).join(", ")+(ti.unknown ? (ti.missing.length?" + ":"")+ti.unknown+" non identificat"+(ti.unknown===1?"o":"i") : "")+'</div>';
   $("wrap").innerHTML = h + '</div>';
-  infoLine(ti.total);
+  infoLine(ti.expected);
 }
 async function sendTabMode(){
   const url = $("a_u").value.trim(), pwd = $("a_p").value, m = $("a_tm").value;
