@@ -141,12 +141,6 @@ table.rt tr.ed td{padding:6px 10px 14px;background:rgba(255,212,0,.07)}
 .tcs.sm .tc b{font-size:11px}
 
 /* tabulato */
-.seg{display:flex;gap:4px;background:rgba(0,0,0,.38);padding:4px;border-radius:14px;margin:6px 10px 4px}
-.seg button{flex:1;border:0;background:transparent;color:#cfe8dc;padding:9px 4px;border-radius:11px;font-weight:800;font-size:13px}
-.seg button.on{background:var(--card2);color:#fff;box-shadow:0 0 0 1px var(--gold) inset}
-.hits{margin:6px 10px;padding:10px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(255,212,0,.3),rgba(245,166,35,.1));border:1px solid rgba(255,212,0,.65);font-size:13px}
-.hits b{color:var(--gold)}
-.hits .hc{display:inline-block;margin:5px 6px 0 0;padding:3px 10px;border-radius:12px;background:var(--gold);color:#1a1a1a;font-weight:800;font-size:12px}
 details.leg{margin:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px}
 details.leg summary{font-weight:700;cursor:pointer}
 .lgw{overflow-x:auto;margin-top:8px}
@@ -156,70 +150,61 @@ table.lg td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
 table.lg td.r{font-weight:900;font-size:14px;text-align:center}
 table.lg td.x{color:var(--gold)}
 .dbg{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.07);font-size:11px;line-height:1.4;word-break:break-word}
-table.tb{table-layout:fixed;border-collapse:separate;border-spacing:0;margin-bottom:14px}
-.tb thead th{position:sticky;top:0;z-index:3;background:#0c3d2a;padding:6px 1px 7px;font-size:11px;line-height:1.3;font-weight:700;border-bottom:2px solid var(--gold)}
-.tb thead th .mn{font-size:10px;opacity:.7}
-.tb thead th .sh{display:inline-block;background:rgba(255,255,255,.13);border-radius:6px;padding:0 5px;margin:1px 0;font-weight:800;letter-spacing:.3px}
-.tb thead th .e{display:inline-block;margin-top:3px;background:var(--gold);color:#1a1a1a;border-radius:9px;padding:0 6px;font-weight:900;font-size:12px}
-.tb thead th .e.no{background:transparent;color:var(--gold);opacity:.6;border:1px solid rgba(255,212,0,.5)}
-.tb thead th .rl{font-size:10px;color:var(--gold);font-weight:700;margin-top:4px}
-.tb td{height:58px;padding:0;border-bottom:1px solid var(--line);text-align:center}
-.tb tbody tr:nth-child(odd) td{background:#0d261c}
-.tb tbody tr:nth-child(even) td{background:#113126}
-.tb td.nm,.tb th.nm{position:sticky;left:0;z-index:2;text-align:left;padding:4px 8px;box-shadow:3px 0 6px rgba(0,0,0,.45)}
-.tb thead th.nm{z-index:5;font-size:12px;background:#0c3d2a}
-.tb .nw{display:flex;align-items:center;gap:7px}
-.tb .nw .av{width:30px;height:30px;font-size:13px}
-.tb .nw .tx{font-weight:700;font-size:13px;line-height:1.15;min-width:0}
-.tb .nw .tx small{display:block;font-size:10px;opacity:.5;font-weight:500}
-.bd{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-weight:900;font-size:15px;color:#fff;box-shadow:inset 0 -3px 5px rgba(0,0,0,.25)}
-.b1{background:#1f9d63}.bX{background:#c58a10}.b2{background:#2f6fdb}
-.bd.win{box-shadow:0 0 0 3px var(--gold),0 0 14px rgba(255,212,0,.8);transform:scale(1.1)}
-.bd.lose{opacity:.2;filter:grayscale(.9)}
-.tb td.xx{font-size:12px;line-height:1.2}
-.tb td.xx small{display:block;opacity:.65;font-size:10px}
-.tb td.bn b{font-size:14px}
-.tb td.hit{background:linear-gradient(135deg,#ffe066,#f5a623)!important;color:#1a1a1a!important;font-weight:900;box-shadow:inset 0 0 0 2px #fff6c4}
-.tb td.hit small{opacity:.75}
-.outs{margin:6px 10px;padding:10px 12px;border-radius:14px;background:rgba(31,182,115,.14);border:1px solid rgba(31,182,115,.55);font-size:13px}
-.outs b{color:#7df0b8}
-.outs .oc{display:inline-block;margin:5px 6px 0 0;padding:3px 10px;border-radius:12px;background:#1f9d63;color:#fff;font-weight:600;font-size:12px}
-.outs .oc b{color:#fff;font-weight:900}
-.tb td.us b{font-size:14px;color:#7df0b8}
-.tb td.us.hit b{color:#1a1a1a}
-.tb td.miss{background:rgba(255,90,95,.14)!important}
-.tb td.miss b{color:#ffb4b4}
-.tb thead th.hj{background:linear-gradient(180deg,#8a3d00,#5a2800);color:#ffd9a8;font-weight:900;font-size:11px;letter-spacing:.06em;padding:6px 2px}
-.tb thead th.hj .jj{width:30px;height:30px;font-size:20px;display:flex;margin:0 auto 3px}
-.tb td.jo.on{background:rgba(240,106,0,.3)!important}
-.tb td.jo .si{background:#f06a00;color:#fff;border-radius:11px;padding:3px 8px;font-weight:800;font-size:12px}
-.tb td.pt{font-weight:900;font-size:18px;color:var(--gold)}
 
 /* vista per partita */
-.mc{margin:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.mh{display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(90deg,#14543a,var(--card))}
-.mh .mnb{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#1a1a1a;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none;font-size:13px}
+/* ===== tabulato: semplice, poco colore ===== */
+.seg{display:flex;gap:4px;margin:6px 10px 4px}
+.seg button{flex:1;border:1px solid rgba(255,255,255,.2);background:transparent;color:#cfe8dc;padding:8px 4px;border-radius:10px;font-weight:700;font-size:13px}
+.seg button.on{background:rgba(255,255,255,.12);color:#fff;border-color:var(--gold)}
+.hits{margin:6px 10px;padding:8px 12px;border-radius:10px;background:rgba(255,212,0,.1);border:1px solid rgba(255,212,0,.45);font-size:13px;line-height:1.5}
+.hits b{color:var(--gold)}
+.hits .hc{display:inline-block;margin:3px 12px 0 0}
+.outs{margin:6px 10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.5}
+.outs b{color:var(--gold)}
+.outs .oc{display:inline-block;margin:3px 12px 0 0}
+table.tb{table-layout:fixed;border-collapse:collapse;margin-bottom:12px}
+.tb thead th{position:sticky;top:0;z-index:3;background:#0a2a1d;padding:4px 0 5px;font-size:10px;line-height:1.25;font-weight:600;border-bottom:1px solid rgba(255,255,255,.25)}
+.tb thead th i{display:block;font-style:normal;opacity:.5}
+.tb thead th b{display:block;color:var(--gold);font-size:12px;font-weight:700}
+.tb thead th b.no{opacity:.35;font-weight:400}
+.tb thead th.hj{color:#ff9a3c;font-weight:800;font-size:14px}
+.tb td{height:38px;padding:0;border-bottom:1px solid rgba(255,255,255,.07);text-align:center;font-size:14px}
+.tb td.nm,.tb th.nm{position:sticky;left:0;z-index:2;background:#0a2a1d;text-align:left;padding:0 6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb thead th.nm{z-index:5;font-size:11px}
+.tb td.nm small{opacity:.4;margin-right:4px;font-size:10px;font-weight:400}
+.tb td.w{background:rgba(31,182,115,.28);font-weight:800}
+.tb td.l{opacity:.3}
+.tb td.ex,.tb td.us{font-size:12px;line-height:1.15}
+.tb td.ex small,.tb td.us small{display:block;font-size:9px;opacity:.5}
+.tb td.hit{background:rgba(255,212,0,.3);font-weight:800}
+.tb td.jo{color:#ff9a3c;font-weight:800}
+.tb td.pt{font-weight:800;color:var(--gold)}
+.bd{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.4);font-weight:800;font-size:13px}
+/* vista per partita */
+.mc{margin:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mh{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.mh .mnb{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.4);font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;font-size:12px}
 .mh .mt{flex:1;min-width:0}
 .mh .mt small{display:block;font-size:11px;opacity:.65}
 .mh .mt b{font-size:15px;line-height:1.2}
 .mh .mt em{opacity:.5;font-style:normal;font-size:12px;margin:0 4px}
-.mh .mr{background:var(--gold);color:#1a1a1a;font-weight:900;border-radius:12px;padding:5px 11px;font-size:15px;flex:none}
-.mh .mr.no{background:transparent;color:var(--gold);border:1px solid rgba(255,212,0,.5);font-size:11px;font-weight:700}
-.pb{display:flex;height:24px;margin:10px 12px 4px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.06)}
-.pb i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff;min-width:0;overflow:hidden}
-.pb i.s1{background:#1f9d63}.pb i.sX{background:#c58a10}.pb i.s2{background:#2f6fdb}
-details.gr{margin:4px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid transparent}
-details.gr summary{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;list-style:none}
+.mh .mr{color:var(--gold);font-weight:800;font-size:15px;flex:none}
+.mh .mr.no{opacity:.45;font-size:11px;font-weight:400}
+.pb{display:flex;height:20px;margin:10px 12px 4px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.05)}
+.pb i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700;color:#fff;min-width:0;overflow:hidden}
+.pb i.s1{background:rgba(255,255,255,.28)}.pb i.sX{background:rgba(255,255,255,.16)}.pb i.s2{background:rgba(255,255,255,.08)}
+details.gr{margin:3px 12px;border-radius:8px;border:1px solid transparent}
+details.gr summary{display:flex;align-items:center;gap:10px;padding:7px 8px;cursor:pointer;list-style:none}
 details.gr summary::-webkit-details-marker{display:none}
-details.gr summary b{font-size:16px}
+details.gr summary b{font-size:15px}
 details.gr summary small{opacity:.65}
 details.gr summary .ar{margin-left:auto;opacity:.5}
-details.gr.win{border-color:rgba(255,212,0,.7);background:rgba(255,212,0,.12)}
-details.gr.lose{opacity:.55}
-.ch{padding:2px 10px 10px;display:flex;flex-wrap:wrap;gap:6px}
-.ch span{background:rgba(255,255,255,.1);border-radius:12px;padding:3px 10px;font-size:12px;font-weight:600}
-details.gr.win .ch span{background:var(--gold);color:#1a1a1a;font-weight:800}
-.mc .pad{height:8px}
+details.gr.win{border-color:rgba(255,212,0,.6);background:rgba(255,212,0,.08)}
+details.gr.lose{opacity:.5}
+.ch{padding:2px 8px 8px;display:flex;flex-wrap:wrap;gap:6px}
+.ch span{background:rgba(255,255,255,.08);border-radius:10px;padding:2px 9px;font-size:12px}
+details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
+.mc .pad{height:6px}
 </style>
 </head>
 <body>
@@ -384,7 +369,7 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbxIKerwolMAE24ATLpbLBL1TSa1FcF0_0yUY9aiOQ0t7_IuO4dlSqC6RVlF7_vMISFh/exec",
+  WEBAPP: "",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio (riga 60, colonna B).
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 60, col: "B" },
@@ -620,9 +605,12 @@ async function loadAllInner(){
   if(errs.length && S.discErr) S.sheets = [];   /* riprova la ricerca al prossimo giro */
   S.err = errs.join(" • ");
   S.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
-  saveCache();
-  S.ready = true;
-  render();
+  /* aggiorno lo schermo solo se i dati sono cambiati (o al massimo ogni 5 minuti): pagina più leggera */
+  const sig = JSON.stringify([S.finale.live, S.intermedia.live, S.tabulato.live, S.finale.data, S.intermedia.data, S.tabulato.data, S.err, Math.floor(Date.now()/300000)]);
+  const changed = (sig !== S.sig); S.sig = sig;
+  if(changed) saveCache();
+  const first = !S.ready; S.ready = true;
+  if(changed || first) render(); else refreshInfo();
 }
 async function loadAll(){
   try{ await loadAllInner(); }
@@ -639,9 +627,13 @@ function ranked(list, f, nm){
   let pos=0, last=null;
   return s.map((x,i)=>{ const v=f(x); if(v!==last){pos=i+1; last=v} return {x,pos}; });
 }
+function refreshInfo(){
+  const s = S[KEYS[cur]], d = s.data;
+  infoLine(cur===2 ? d.part.length : (cur===1 ? d.rows.length : d.length));
+}
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v31 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v32 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -767,28 +759,25 @@ function viewPartecipanti(){
     (M.some(m=>m.out) ? "" : '<div class="dbg">ℹ️ Nessun punteggio esatto trovato nel foglio. ' + (d.dbg ? ("Esiti letti (C3:C16): "+esc(M.map(m=>m.raw===""||m.raw==null?"∅":m.raw).join(" ")) + "<br>Risultati esatti letti ("+esc(CONFIG.EXACT.col)+esc(CONFIG.EXACT.row)+" e seguenti): "+esc(M.map(m=>m.ex===""||m.ex==null?"∅":m.ex).join(" | "))) : "Dati incorporati: collegati al foglio compariranno qui.") + "</div>") +
     "</details>";
   if(!part.length){ $("wrap").innerHTML = h+'<div id="msg">Nessun partecipante trovato</div>'; infoLine(0); return; }
-  h += '<table class="tb"><colgroup><col style="width:150px">' + M.map(()=>'<col style="width:46px">').join("") +
-       '<col style="width:92px"><col style="width:82px"><col style="width:60px"><col style="width:48px"></colgroup>';
-  h += '<thead><tr><th class="nm">Partecipante<div class="rl">Risultato ▸</div></th>' +
-       M.map((m,i)=>`<th><div class="mn">${i+1}</div><span class="sh">${esc(m.a)}</span><br><span class="sh">${esc(m.b)}</span><br><span class="e${m.shown?"":" no"}">${esc(m.shown||"–")}</span></th>`).join("") +
-       "<th>🎯 Risultato esatto</th><th>✅ Uscito</th><th class='hj'><span class='jj'>J</span><div>JOLLY</div></th><th>Pt</th></tr></thead><tbody>";
+  h += '<table class="tb"><colgroup><col style="width:128px">' + M.map(()=>'<col style="width:36px">').join("") +
+       '<col style="width:70px"><col style="width:62px"><col style="width:32px"><col style="width:40px"></colgroup>';
+  h += '<thead><tr><th class="nm">Partecipante</th>' +
+       M.map((m,i)=>`<th><i>${i+1}</i>${esc(m.a)}<br>${esc(m.b)}<b class="${m.shown?"":"no"}">${esc(m.shown||"·")}</b></th>`).join("") +
+       "<th>Esatto</th><th>Uscito</th><th class='hj'>J</th><th>Pt</th></tr></thead><tbody>";
   part.forEach(({p,i})=>{
     const ex = exactOf(p, M);
-    h += `<tr><td class="nm"><div class="nw">${av(p.nome)}<span class="tx"><small>#${i+1}</small>${esc(p.nome)}</span></div></td>`;
+    h += `<tr><td class="nm"><small>${i+1}</small>${esc(p.nome)}</td>`;
     M.forEach((m,k)=>{
       const v = p.preds[k] || "";
-      const st = m.esito ? (v===m.esito ? " win" : " lose") : "";
-      h += /^[1X2]$/.test(v) ? `<td><span class="bd b${v}${st}">${v}</span></td>` : "<td></td>";
+      h += `<td${m.esito && v ? (v===m.esito ? ' class="w"' : ' class="l"') : ""}>${esc(v)}</td>`;
     });
     const sc = p.scelta ? splitMatch(p.scelta) : null;
-    const mm = ex.k>=0 ? M[ex.k] : null, played = !!mm && !!mm.out;
-    const out = played ? showOut(mm.out) : (isOut(p.esatto) ? showOut(p.esatto) : "");
-    const cls = ex.hit ? " hit" : (out && isOut(p.bonus) ? " miss" : "");
-    h += `<td class="xx bn${cls}">${sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:""}<b>${esc(p.bonus||"–")}</b>` +
-         (ex.hit ? "<small>✓ esatto</small>" : "") + "</td>";
-    h += `<td class="xx us${ex.hit?" hit":""}">` + (out ? (sc?`<small>${esc(sc.a)}–${esc(sc.b)}</small>`:"") + `<b>${esc(out)}</b>` : '<span style="opacity:.3">–</span>') + "</td>";
-    h += `<td class="xx jo${p.jolly==="SI"?" on":""}">${p.jolly==="SI"?'<span class="si">SÌ</span>':'<span style="opacity:.3">–</span>'}</td>`;
-    h += `<td class="pt">${p.tot}</td></tr>`;
+    const mm = ex.k>=0 ? M[ex.k] : null;
+    const out = (mm && mm.out) ? showOut(mm.out) : (isOut(p.esatto) ? showOut(p.esatto) : "");
+    const ab2 = sc ? `<small>${esc(sc.a)}–${esc(sc.b)}</small>` : "";
+    h += `<td class="ex${ex.hit?" hit":""}">${ab2}${esc(p.bonus||"–")}</td>`;
+    h += `<td class="us${ex.hit?" hit":""}">${out ? ab2+esc(out) : '<span style="opacity:.3">–</span>'}</td>`;
+    h += `<td class="jo">${p.jolly==="SI"?"J":""}</td><td class="pt">${p.tot}</td></tr>`;
   });
   $("wrap").innerHTML = h+"</tbody></table>";
   infoLine(part.length);
