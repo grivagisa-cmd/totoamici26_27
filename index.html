@@ -162,20 +162,22 @@ table.lg td.x{color:var(--gold)}
 .outs{margin:6px 10px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.06);font-size:13px;line-height:1.5}
 .outs b{color:var(--gold)}
 .outs .oc{display:inline-block;margin:3px 12px 0 0}
-table.tb{table-layout:fixed;border-collapse:collapse;margin-bottom:12px}
-.tb thead th{position:sticky;top:0;z-index:3;background:#0a2a1d;padding:4px 0 5px;font-size:10px;line-height:1.25;font-weight:600;border-bottom:1px solid rgba(255,255,255,.25)}
+table.tb{table-layout:fixed;border-collapse:collapse;margin-bottom:12px;font-size:14px}
+.tb thead th{position:sticky;top:0;z-index:3;background:#0a2a1d;padding:.35em .2em .45em;font-size:.72em;line-height:1.3;font-weight:600;border-bottom:1px solid rgba(255,255,255,.25)}
+.tb thead th em{display:block;font-style:normal;letter-spacing:.02em}
+.tb thead th em+em{margin:.3em .45em 0;padding-top:.3em;border-top:1px solid rgba(255,255,255,.5)}
 .tb thead th i{display:block;font-style:normal;opacity:.5}
-.tb thead th b{display:block;color:var(--gold);font-size:12px;font-weight:700}
+.tb thead th b{display:block;color:var(--gold);font-size:1.2em;font-weight:700;margin-top:.35em}
 .tb thead th b.no{opacity:.35;font-weight:400}
-.tb thead th.hj{color:#ff9a3c;font-weight:800;font-size:14px}
-.tb td{height:38px;padding:0;border-bottom:1px solid rgba(255,255,255,.07);text-align:center;font-size:14px}
-.tb td.nm,.tb th.nm{position:sticky;left:0;z-index:2;background:#0a2a1d;text-align:left;padding:0 6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb thead th.nm{z-index:5;font-size:11px}
-.tb td.nm small{opacity:.4;margin-right:4px;font-size:10px;font-weight:400}
+.tb thead th.hj{color:#ff9a3c;font-weight:800;font-size:1.1em}
+.tb td{height:2.8em;padding:0;border-bottom:1px solid rgba(255,255,255,.07);text-align:center}
+.tb td.nm,.tb th.nm{position:sticky;left:0;z-index:2;background:#0a2a1d;text-align:left;padding:0 .45em;font-size:.93em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb thead th.nm{z-index:5;font-size:.78em}
+.tb td.nm small{opacity:.4;margin-right:.3em;font-size:.75em;font-weight:400}
 .tb td.w{background:rgba(31,182,115,.28);font-weight:800}
 .tb td.l{opacity:.3}
-.tb td.ex,.tb td.us{font-size:12px;line-height:1.15}
-.tb td.ex small,.tb td.us small{display:block;font-size:9px;opacity:.5}
+.tb td.ex,.tb td.us{font-size:.86em;line-height:1.2}
+.tb td.ex small,.tb td.us small{display:block;font-size:.75em;opacity:.55}
 .tb td.hit{background:rgba(255,212,0,.3);font-weight:800}
 .tb td.jo{color:#ff9a3c;font-weight:800}
 .tb td.pt{font-weight:800;color:var(--gold)}
@@ -633,7 +635,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v32 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v33 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -759,10 +761,10 @@ function viewPartecipanti(){
     (M.some(m=>m.out) ? "" : '<div class="dbg">ℹ️ Nessun punteggio esatto trovato nel foglio. ' + (d.dbg ? ("Esiti letti (C3:C16): "+esc(M.map(m=>m.raw===""||m.raw==null?"∅":m.raw).join(" ")) + "<br>Risultati esatti letti ("+esc(CONFIG.EXACT.col)+esc(CONFIG.EXACT.row)+" e seguenti): "+esc(M.map(m=>m.ex===""||m.ex==null?"∅":m.ex).join(" | "))) : "Dati incorporati: collegati al foglio compariranno qui.") + "</div>") +
     "</details>";
   if(!part.length){ $("wrap").innerHTML = h+'<div id="msg">Nessun partecipante trovato</div>'; infoLine(0); return; }
-  h += '<table class="tb"><colgroup><col style="width:128px">' + M.map(()=>'<col style="width:36px">').join("") +
-       '<col style="width:70px"><col style="width:62px"><col style="width:32px"><col style="width:40px"></colgroup>';
+  h += '<table class="tb"><colgroup><col style="width:9.5em">' + M.map(()=>'<col style="width:3.1em">').join("") +
+       '<col style="width:5.4em"><col style="width:4.8em"><col style="width:2.5em"><col style="width:3em"></colgroup>';
   h += '<thead><tr><th class="nm">Partecipante</th>' +
-       M.map((m,i)=>`<th><i>${i+1}</i>${esc(m.a)}<br>${esc(m.b)}<b class="${m.shown?"":"no"}">${esc(m.shown||"·")}</b></th>`).join("") +
+       M.map((m,i)=>`<th><i>${i+1}</i><em>${esc(m.a)}</em><em>${esc(m.b)}</em><b class="${m.shown?"":"no"}">${esc(m.shown||"·")}</b></th>`).join("") +
        "<th>Esatto</th><th>Uscito</th><th class='hj'>J</th><th>Pt</th></tr></thead><tbody>";
   part.forEach(({p,i})=>{
     const ex = exactOf(p, M);
