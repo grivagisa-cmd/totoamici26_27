@@ -68,6 +68,9 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 #toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ===== tabulato nascosto ===== */
+.conc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 14px 0}
+.conc b{font-size:18px}
+.conc span{opacity:.75;font-size:13px}
 .lock{margin:26px 14px;padding:24px 16px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px}
 .lock .lk{font-size:46px;line-height:1}
 .lock h2{margin:8px 0 4px;font-size:19px}
@@ -385,7 +388,10 @@ const CONFIG = {
   WHO: { row: 59, col: "D" },
   WEBAPPCELL: { row: 60, col: "D" },
   /* blocco dell'inserimento dei partecipanti: E60 ("bloccato" = chiuso, vuoto o "libero" = aperto) */
-  LOCK: { row: 60, col: "E" }
+  LOCK: { row: 60, col: "E" },
+  /* numero del concorso (cella C2 del tabulato) e date del concorso (testo libero, es. "Sab 25 – Lun 27 ottobre", cella F60) */
+  CONCORSO: { row: 2, col: "C" },
+  DATA: { row: 60, col: "F" }
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -484,8 +490,12 @@ function parseTab(rows){
   rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
   let start = labelCol+1, resultCol = -1;
   const hc = t(nameRow[start]);
-  if(hc==="" || /^c\d+$/i.test(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
-  const turno = /^c\d+$/i.test(hc) ? hc.toUpperCase() : "";
+  const isConc = x => /^(c|conc\.?|concorso)?\s*\d+$/i.test(x);
+  if(hc==="" || isConc(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
+  const turno = isConc(hc) ? hc.toUpperCase() : "";
+  const concRaw = t((rows[CONFIG.CONCORSO.row-1]||[])[colIdx(CONFIG.CONCORSO.col)]) || (isConc(hc) ? hc : "");
+  const concNum = (concRaw.match(/\d+/)||[""])[0];
+  const dataConc = t((rows[CONFIG.DATA.row-1]||[])[colIdx(CONFIG.DATA.col)]);
   const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
   if(cols.length<3) return null;
   const partite = blk.map(i=>{
@@ -527,7 +537,7 @@ function parseTab(rows){
   const webapp = /^https:\/\/script\.google\.com\//i.test(wl) ? wl : "";
   const lk = t((rows[CONFIG.LOCK.row-1]||[])[colIdx(CONFIG.LOCK.col)]).toLowerCase();
   const locked = /^(bloccat|chiuso|closed)/.test(lk);
-  return {partite, part, link, linkRaw, turno, mode, webapp, locked, dbg:{labelCol, resultCol, start}};
+  return {partite, part, link, linkRaw, turno, concRaw, concNum, dataConc, mode, webapp, locked, dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -635,7 +645,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v33 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v34 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -742,6 +752,11 @@ function outsBanner(M){
   if(!o.length) return "";
   return '<div class="outs">⚽ <b>Risultati usciti</b><br>' + o.map(m=>`<span class="oc">${esc(m.a)}–${esc(m.b)} <b>${esc(showOut(m.out))}</b></span>`).join("") + "</div>";
 }
+const concLabel = d => d.concNum ? "Concorso "+d.concNum : (d.concRaw || "");
+function concHeader(d){
+  const l = concLabel(d); if(!l && !d.dataConc) return "";
+  return '<div class="conc"><b>'+esc(l)+'</b>'+(d.dataConc ? '<span>'+esc(d.dataConc)+'</span>' : "")+'</div>';
+}
 function viewTabulato(){
   const ti = tabInfo();
   if(!ti.visible){ viewLock(ti); return; }
@@ -752,7 +767,7 @@ function viewPartecipanti(){
   const q = norm($("q").value), d = S.tabulato.data;
   const M = buildM(d);
   const part = d.part.map((p,i)=>({p,i})).filter(o=>!q || norm(o.p.nome).includes(q));
-  let h = seg() + hitsBanner(d, M) + outsBanner(M);
+  let h = concHeader(d) + seg() + hitsBanner(d, M) + outsBanner(M);
   const winners = M.map(()=>[]);
   d.part.forEach(p=>{ const e = exactOf(p,M); if(e.hit && e.k>=0) winners[e.k].push(p.nome); });
   h += '<details class="leg"><summary>📅 Partite e risultati</summary><div class="lgw"><table class="lg"><thead><tr><th>#</th><th>Partita</th><th>Esito</th><th>🎯 Esatto</th><th>Inserito da</th><th>Indovinato da</th></tr></thead><tbody>' +
@@ -789,7 +804,7 @@ function viewPartite(){
   const q = norm($("q").value), d = S.tabulato.data;
   const M = buildM(d);
   const tot = d.part.length || 1;
-  let h = seg() + hitsBanner(d, M) + outsBanner(M);
+  let h = concHeader(d) + seg() + hitsBanner(d, M) + outsBanner(M);
   M.forEach((m,i)=>{
     const g = {"1":[], "X":[], "2":[]};
     d.part.forEach(p=>{ const v=p.preds[i]; if(g[v]) g[v].push(p.nome); });
@@ -892,7 +907,7 @@ function tabInfo(){
 function viewLock(ti){
   const pct = ti.expected ? Math.min(100, Math.round(ti.delivered*100/ti.expected)) : 0;
   const u = curLink(), link = /^https?:\/\//i.test(u) ? u : "";
-  let h = '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(ti.turno)+' non ancora visibile</h2>';
+  let h = '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(concLabel(S.tabulato.data) || ti.turno)+' non ancora visibile</h2>';
   h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti i '+ti.expected+' partecipanti avranno consegnato i pronostici.</p>';
   if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+ti.delivered+' su '+ti.expected+'</div>';
   if(link) h += '<a class="btnl" href="'+esc(link)+'" target="_blank" rel="noopener">📝 Inserisci i pronostici</a>';
@@ -1086,7 +1101,7 @@ function initInstall(){
 function render(){
   fillAdm(); updLink();
   if($("ris").classList.contains("open") && EDIT<0) renderRis();
-  $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"][cur];
+  { const dd = S.tabulato.data; $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"+(dd.concNum ? " · C"+dd.concNum : "")][cur]; }
   $("ico2").textContent = tabInfo().visible ? "📋" : "🔒";
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
   if(!S.ready){
