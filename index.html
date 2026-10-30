@@ -67,6 +67,23 @@ body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);p
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#0e4a31;color:#fff;border:1px solid var(--gold);padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:all .25s;z-index:80}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* ===== premi ===== */
+.pr{margin:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.prh{padding:8px 12px;border-bottom:1px solid var(--line);font-weight:800}
+.pri{padding:8px 12px;border-bottom:1px solid var(--line)}
+.pri:last-child{border-bottom:0}
+.prt{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:700}
+.prt span{font-weight:400;opacity:.85;font-size:13px}
+.prn{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.prn span{background:rgba(255,255,255,.08);border-radius:10px;padding:2px 9px;font-size:12px}
+.prn span.me{background:rgba(255,212,0,.3);font-weight:700}
+details.pp{margin:5px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+details.pp summary{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;cursor:pointer;list-style:none;font-weight:600}
+details.pp summary::-webkit-details-marker{display:none}
+details.pp summary small{opacity:.55;font-weight:400}
+.pp .tt{color:var(--gold);font-weight:800}
+.pd{padding:0 12px 8px;font-size:13px}
+.pd div{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(255,255,255,.07)}
 /* ===== tabulato nascosto ===== */
 .conc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 14px 0}
 .conc b{font-size:18px}
@@ -234,6 +251,7 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <button class="di on" data-go="0"><span>🏆</span>Classifica finale</button>
     <button class="di" data-go="1"><span>📈</span>Classifica intermedia</button>
     <button class="di" data-go="2"><span id="ico2">📋</span>Tabulato</button>
+    <button class="di" data-go="3"><span>💶</span>Premi</button>
     <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
     <button class="di" id="dRis"><span>⚽</span>Inserisci risultati</button>
     <div class="dsep">App</div>
@@ -283,6 +301,7 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <label>Foglio Classifica finale</label><input id="g_finale" inputmode="text" placeholder="es. 123456789">
     <label>Foglio Classifica intermedia</label><input id="g_intermedia" inputmode="text" placeholder="es. 987654321">
     <label>Foglio Tabulato</label><input id="g_tabulato" inputmode="text" placeholder="es. 456789123">
+    <label>Foglio Vincite (premi)</label><input id="g_premi" inputmode="text" placeholder="es. 321654987">
     <div style="margin-top:10px"><button class="b full" id="bSave">Salva e ricarica</button></div>
   </details></div>
 </div>
@@ -368,8 +387,8 @@ const INTERMEDIA = [["el guerriero",5,8,10,0,23],["Master chef 1",8,7,8,0,23],["
 const CONFIG = {
   BASE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6XtbY4S0WB59_Cxe0vByMR91d-XXZ4cx6HGMBUa6hqlomWmEh55xcza0LOhECKMRQ8RElSGCSUUB/pub",
   /* gid dei fogli: se lasci vuoto, la pagina prova a trovarli dal nome del foglio */
-  GID:   { finale:"", intermedia:"", tabulato:"" },
-  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat/i },
+  GID:   { finale:"", intermedia:"", tabulato:"", premi:"" },
+  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat/i, premi:/vincit|premi/i },
   REFRESH: 60,
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
@@ -391,7 +410,9 @@ const CONFIG = {
   LOCK: { row: 60, col: "E" },
   /* numero del concorso (cella C2 del tabulato) e date del concorso (testo libero, es. "Sab 25 – Lun 27 ottobre", cella F60) */
   CONCORSO: { row: 2, col: "C" },
-  DATA: { row: 60, col: "F" }
+  DATA: { row: 60, col: "F" },
+  /* sezione Premi: mostrare anche se un premio è già stato pagato (colonna "Pagato?" del foglio Vincite) */
+  PREMI_MOSTRA_PAGATO: false
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -428,20 +449,21 @@ const S = {
   finale:     {live:false, data:FINALE},
   intermedia: {live:false, data:{turni:["C1","C2","C3","C4"], rows:INTERMEDIA.map(r=>[r[0],[r[1],r[2],r[3],r[4]],r[5]])}},
   tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",who:"",esito:""})), part:P0}},
-  err:"", time:"", sheets:[], ready:false
+  premi: {live:false, data:{rows:[]}},
+  err:"", time:"", sheets:[], ready:false, skip:{}
 };
 /* ultimi dati letti dal foglio: usati solo se al prossimo avvio il foglio non risponde (mai mostrati prima della lettura) */
 function loadCache(){
   try{
     const c = JSON.parse(localStorage.getItem("toto_cache")||"null"); if(!c) return;
-    ["finale","intermedia","tabulato"].forEach(k=>{ if(c[k]) S[k] = {live:false, cached:true, data:c[k]}; });
+    ["finale","intermedia","tabulato","premi"].forEach(k=>{ if(c[k]) S[k] = {live:false, cached:true, data:c[k]}; });
     S.cacheT = c.t;
   }catch(e){}
 }
 function saveCache(){
   try{
     const c = JSON.parse(localStorage.getItem("toto_cache")||"{}");
-    ["finale","intermedia","tabulato"].forEach(k=>{ if(S[k].live) c[k] = S[k].data; });
+    ["finale","intermedia","tabulato","premi"].forEach(k=>{ if(S[k].live) c[k] = S[k].data; });
     c.t = Date.now();
     localStorage.setItem("toto_cache", JSON.stringify(c));
   }catch(e){}
@@ -574,17 +596,37 @@ async function discover(){
     S.discErr = ""; return out;
   }catch(e){ S.discErr = "ricerca fogli: "+e.message; return [{gid:"0", name:"primo foglio"}]; }
 }
+/* ---- foglio "Vincite": un premio vinto per riga ---- */
+function moneyNum(x){
+  let v = t(x).replace(/[€\s]/g,""); if(!v) return null;
+  if(v.includes(",")) v = v.replace(/\./g,"").replace(",",".");
+  const n = parseFloat(v); return isNaN(n) ? null : n;
+}
+function parsePremi(rows){
+  const h = rows.findIndex(r=>r.some(c=>/^turno$/i.test(t(c))) && r.some(c=>/partecip/i.test(t(c))) && r.some(c=>/^tipo/i.test(t(c))));
+  if(h<0) return null;
+  const hr = rows[h], ci = re => hr.findIndex(c=>re.test(t(c).replace(/\s+/g," ")));
+  const it=ci(/^turno$/i), ik=ci(/^tipo/i), ip=ci(/partecip/i), iq=ci(/quota/i), ii=ci(/importo/i), ig=ci(/pagato/i);
+  if(it<0 || ik<0 || ip<0 || iq<0) return null;
+  const out = [];
+  rows.slice(h+1).forEach(r=>{
+    const tu=t(r[it]), tp=t(r[ik]), nm=t(r[ip]); if(!tu || !tp || !nm) return;
+    out.push({turno:tu, tipo:tp, nome:nm, quota:moneyNum(r[iq])||0, importo:ii>=0 ? (moneyNum(r[ii])||0) : 0, pagato:ig>=0 && /^s[iì]$/i.test(t(r[ig]))});
+  });
+  return {rows:out};
+}
 /* riconosce il tipo di foglio dal contenuto */
 function classify(rows){
   const i = parseInter(rows); if(i) return ["intermedia", i];
   const tb = parseTab(rows);  if(tb) return ["tabulato", tb];
   const f = parseFinale(rows); if(f) return ["finale", f];
+  const pr = parsePremi(rows); if(pr) return ["premi", pr];
   return null;
 }
 
 async function loadAllInner(){
-  const KS = ["finale","intermedia","tabulato"], errs = [], fresh = {};
-  const parsers = {finale:parseFinale, intermedia:parseInter, tabulato:parseTab};
+  const KS = ["finale","intermedia","tabulato","premi"], errs = [], fresh = {};
+  const parsers = {finale:parseFinale, intermedia:parseInter, tabulato:parseTab, premi:parsePremi};
   if(!S.map) S.map = {};
   KS.forEach(k=>{ if(CONFIG.GID[k]) S.map[k] = CONFIG.GID[k]; });
   const missing = KS.filter(k=>!S.map[k]);
@@ -593,9 +635,10 @@ async function loadAllInner(){
     const cand = {};
     for(const sh of S.sheets){
       if(Object.values(S.map).includes(sh.gid)) continue;
+      if(S.skip[sh.gid] && Date.now()-S.skip[sh.gid] < 30*60000) continue;     /* foglio già visto e non utile: lo ricontrollo ogni 30 minuti */
       try{
         const c = classify(await csv(sh.gid));
-        if(c) (cand[c[0]] = cand[c[0]] || []).push({gid:sh.gid, name:sh.name, data:c[1]});
+        if(c) (cand[c[0]] = cand[c[0]] || []).push({gid:sh.gid, name:sh.name, data:c[1]}); else S.skip[sh.gid] = Date.now();
       }catch(e){ S.lastErr = "gid "+sh.gid+": "+e.message; }
     }
     for(const k of missing){
@@ -607,18 +650,18 @@ async function loadAllInner(){
   for(const k of KS){
     if(fresh[k]) continue;
     const gid = S.map[k];
-    if(!gid){ errs.push(k+": foglio non riconosciuto"+(S.lastErr?" ("+S.lastErr+")":"")); continue; }
+    if(!gid){ if(k!=="premi") errs.push(k+": foglio non riconosciuto"+(S.lastErr?" ("+S.lastErr+")":"")); continue; }
     try{
       const d = parsers[k](await csv(gid));
       if(!d) throw new Error("formato non riconosciuto");
       S[k] = {live:true, data:d};
-    }catch(e){ errs.push(k+": "+e.message); }
+    }catch(e){ if(k!=="premi") errs.push(k+": "+e.message); }
   }
   if(errs.length && S.discErr) S.sheets = [];   /* riprova la ricerca al prossimo giro */
   S.err = errs.join(" • ");
   S.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
   /* aggiorno lo schermo solo se i dati sono cambiati (o al massimo ogni 5 minuti): pagina più leggera */
-  const sig = JSON.stringify([S.finale.live, S.intermedia.live, S.tabulato.live, S.finale.data, S.intermedia.data, S.tabulato.data, S.err, Math.floor(Date.now()/300000)]);
+  const sig = JSON.stringify([S.finale.live, S.intermedia.live, S.tabulato.live, S.premi.live, S.finale.data, S.intermedia.data, S.tabulato.data, S.premi.data, S.err, Math.floor(Date.now()/300000)]);
   const changed = (sig !== S.sig); S.sig = sig;
   if(changed) saveCache();
   const first = !S.ready; S.ready = true;
@@ -631,7 +674,7 @@ async function loadAll(){
 
 /* ==================== VISTE ==================== */
 let cur = 0, showDet = true, tv = "p";
-const KEYS = ["finale","intermedia","tabulato"];
+const KEYS = ["finale","intermedia","tabulato","premi"];
 const medal = pos => ["🥇","🥈","🥉"][pos-1] || pos;
 function ranked(list, f, nm){
   /* punti dal più alto al più basso; a parità di punti, ordine alfabetico (senza distinguere maiuscole e minuscole) */
@@ -641,11 +684,11 @@ function ranked(list, f, nm){
 }
 function refreshInfo(){
   const s = S[KEYS[cur]], d = s.data;
-  infoLine(cur===2 ? d.part.length : (cur===1 ? d.rows.length : d.length));
+  infoLine(cur===2 ? d.part.length : (cur===1 || cur===3 ? d.rows.length : d.length));
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v34 · "+n+" partecipanti · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v35 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -756,6 +799,56 @@ const concLabel = d => d.concNum ? "Concorso "+d.concNum : (d.concRaw || "");
 function concHeader(d){
   const l = concLabel(d); if(!l && !d.dataConc) return "";
   return '<div class="conc"><b>'+esc(l)+'</b>'+(d.dataConc ? '<span>'+esc(d.dataConc)+'</span>' : "")+'</div>';
+}
+/* ===== sezione Premi ===== */
+let pv = "g";
+function setPv(v){ pv = v; render(); $("wrap").scrollTo(0,0); }
+const eur = x => (Math.round(x*100)/100).toLocaleString("it-IT",{minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+const turnoNum = tu => /final/i.test(tu) ? 999 : ((String(tu).match(/\d+/)||[500])[0] * 1);
+const turnoLabel = tu => /final/i.test(tu) ? "Premi finali" : (/^c\d+$/i.test(tu) ? "Concorso "+tu.slice(1) : tu);
+const tipoOrd = tp => /settim/i.test(tp) ? 0 : (/interm/i.test(tp) ? 1 : 2);
+function viewPremi(){
+  const s = S.premi, d = s.data, q = norm($("q").value);
+  const segP = '<div class="seg"><button class="'+(pv==="g"?"on":"")+'" onclick="setPv(\'g\')">📅 Per giornata</button><button class="'+(pv==="p"?"on":"")+'" onclick="setPv(\'p\')">👤 Per partecipante</button></div>';
+  if(!s.live && !s.cached){
+    $("wrap").innerHTML = '<div id="msg">💶 La sezione Premi non è ancora attiva.<br><small>L\'organizzatore deve pubblicare il foglio «Vincite».</small></div>'; infoLine(0); return;
+  }
+  const rows = d.rows;
+  if(!rows.length){ $("wrap").innerHTML = '<div id="msg">Nessun premio assegnato finora.</div>'; infoLine(0); return; }
+  const tot = rows.reduce((a,r)=>a+r.quota, 0);
+  let h = '<div class="conc"><b>Premi assegnati</b><span>'+rows.length+' vincite · '+eur(tot)+'</span></div>' + segP;
+  const okName = n => !q || norm(n).includes(q);
+  if(pv==="g"){
+    const g = {};
+    rows.forEach(r=>{ const k = r.turno; (g[k] = g[k] || {}); (g[k][r.tipo] = g[k][r.tipo] || []).push(r); });
+    const turni = Object.keys(g).sort((a,b)=>turnoNum(b)-turnoNum(a));
+    let shown = 0;
+    turni.forEach(tu=>{
+      const tipi = Object.keys(g[tu]).sort((a,b)=>tipoOrd(a)-tipoOrd(b) || a.localeCompare(b,"it"));
+      const vis = tipi.filter(tp=>!q || g[tu][tp].some(r=>okName(r.nome)));
+      if(!vis.length) return; shown++;
+      h += '<div class="pr"><div class="prh">'+esc(turnoLabel(tu))+'</div>';
+      vis.forEach(tp=>{
+        const arr = g[tu][tp].slice().sort((a,b)=>a.nome.localeCompare(b.nome,"it",{sensitivity:"base"}));
+        h += '<div class="pri"><div class="prt">🏆 '+esc(tp)+'<span>'+arr.length+(arr.length===1?" vincitore":" vincitori")+' · '+eur(arr[0].quota)+(arr.length>1?" a testa":"")+'</span></div><div class="prn">'+
+             arr.map(r=>'<span'+(q && okName(r.nome)?' class="me"':"")+'>'+esc(r.nome)+(CONFIG.PREMI_MOSTRA_PAGATO && r.pagato?" ✓":"")+'</span>').join("")+'</div></div>';
+      });
+      h += '</div>';
+    });
+    if(!shown) h += '<div id="msg">Nessun risultato</div>';
+  } else {
+    const m = {};
+    rows.forEach(r=>{ const k = norm(r.nome); (m[k] = m[k] || {nome:r.nome, tot:0, it:[]}); m[k].tot += r.quota; m[k].it.push(r); });
+    const list = Object.values(m).filter(x=>okName(x.nome)).sort((a,b)=>b.tot-a.tot || a.nome.localeCompare(b.nome,"it",{sensitivity:"base"}));
+    list.forEach(x=>{
+      x.it.sort((a,b)=>turnoNum(a.turno)-turnoNum(b.turno) || tipoOrd(a.tipo)-tipoOrd(b.tipo));
+      h += '<details class="pp"'+(q?" open":"")+'><summary><span>'+esc(x.nome)+' <small>'+x.it.length+(x.it.length===1?" vincita":" vincite")+'</small></span><span class="tt">'+eur(x.tot)+'</span></summary><div class="pd">'+
+           x.it.map(r=>'<div><span>'+esc(turnoLabel(r.turno))+' · '+esc(r.tipo)+(CONFIG.PREMI_MOSTRA_PAGATO && r.pagato?" ✓":"")+'</span><span>'+eur(r.quota)+'</span></div>').join("")+'</div></details>';
+    });
+    if(!list.length) h += '<div id="msg">Nessun risultato</div>';
+  }
+  $("wrap").innerHTML = h;
+  infoLine(rows.length);
 }
 function viewTabulato(){
   const ti = tabInfo();
@@ -1101,7 +1194,7 @@ function initInstall(){
 function render(){
   fillAdm(); updLink();
   if($("ris").classList.contains("open") && EDIT<0) renderRis();
-  { const dd = S.tabulato.data; $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"+(dd.concNum ? " · C"+dd.concNum : "")][cur]; }
+  { const dd = S.tabulato.data; $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"+(dd.concNum ? " · C"+dd.concNum : ""),"Premi"][cur]; }
   $("ico2").textContent = tabInfo().visible ? "📋" : "🔒";
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
   if(!S.ready){
@@ -1109,7 +1202,7 @@ function render(){
     $("dot").textContent = "⏳"; $("info").textContent = "v26 · caricamento…";
     return;
   }
-  if(cur===2) viewTabulato(); else viewClassifica();
+  if(cur===3) viewPremi(); else if(cur===2) viewTabulato(); else viewClassifica();
 }
 
 /*INIT*/
@@ -1153,7 +1246,7 @@ setAdmin(ADMIN);
 checkHash();
 window.addEventListener("hashchange", checkHash);
 
-const GKEYS = ["finale","intermedia","tabulato"];
+const GKEYS = ["finale","intermedia","tabulato","premi"];
 const cleanGid = v => { const m = String(v||"").match(/gid=(\d+)/) || String(v||"").match(/^\s*(\d+)\s*$/); return m ? m[1] : ""; };
 try{ const g = JSON.parse(localStorage.getItem("toto_gid")||"{}"); GKEYS.forEach(k=>{ if(g[k]) CONFIG.GID[k]=g[k]; }); }catch(e){}
 GKEYS.forEach(k=>{ $("g_"+k).value = CONFIG.GID[k]; });
