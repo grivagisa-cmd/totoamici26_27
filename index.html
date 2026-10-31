@@ -412,7 +412,10 @@ const CONFIG = {
   CONCORSO: { row: 2, col: "C" },
   DATA: { row: 60, col: "F" },
   /* sezione Premi: mostrare anche se un premio è già stato pagato (colonna "Pagato?" del foglio Vincite) */
-  PREMI_MOSTRA_PAGATO: false
+  PREMI_MOSTRA_PAGATO: false,
+  /* foglio dei premi: è un documento Google a parte ("Distribuzione Premi Totoamici 2026-27"), condiviso come «chiunque abbia il link può visualizzare» */
+  PREMI_SHEET_ID: "1JBpGIvokeUMciIk5wGRF8uaH8FbMBHLDI5nf4usiV-8",
+  PREMI_SHEET_NAME: "Vincite"
 };
 const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
 
@@ -624,8 +627,19 @@ function classify(rows){
   return null;
 }
 
+/* legge il foglio «Vincite» dal documento dei premi (separato da quello del gioco) */
+async function loadPremiExt(){
+  if(!CONFIG.PREMI_SHEET_ID) return;
+  try{
+    const url = "https://docs.google.com/spreadsheets/d/"+CONFIG.PREMI_SHEET_ID+"/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent(CONFIG.PREMI_SHEET_NAME)+"&t="+Date.now();
+    const d = parsePremi(parseCSV(await getText(url)));
+    if(!d) throw new Error("non trovo le colonne Turno / Tipo premio / Partecipante vincitore / Quota nel foglio «"+CONFIG.PREMI_SHEET_NAME+"» (controlla che il documento sia condiviso con «chiunque abbia il link»)");
+    S.premi = {live:true, data:d}; S.premiErr = "";
+  }catch(e){ S.premiErr = e.message; }
+}
 async function loadAllInner(){
-  const KS = ["finale","intermedia","tabulato","premi"], errs = [], fresh = {};
+  await loadPremiExt();
+  const KS = ["finale","intermedia","tabulato"].concat(CONFIG.PREMI_SHEET_ID ? [] : ["premi"]), errs = [], fresh = {};
   const parsers = {finale:parseFinale, intermedia:parseInter, tabulato:parseTab, premi:parsePremi};
   if(!S.map) S.map = {};
   KS.forEach(k=>{ if(CONFIG.GID[k]) S.map[k] = CONFIG.GID[k]; });
@@ -688,7 +702,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v35 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v36 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -811,7 +825,7 @@ function viewPremi(){
   const s = S.premi, d = s.data, q = norm($("q").value);
   const segP = '<div class="seg"><button class="'+(pv==="g"?"on":"")+'" onclick="setPv(\'g\')">📅 Per giornata</button><button class="'+(pv==="p"?"on":"")+'" onclick="setPv(\'p\')">👤 Per partecipante</button></div>';
   if(!s.live && !s.cached){
-    $("wrap").innerHTML = '<div id="msg">💶 La sezione Premi non è ancora attiva.<br><small>L\'organizzatore deve pubblicare il foglio «Vincite».</small></div>'; infoLine(0); return;
+    $("wrap").innerHTML = '<div id="msg">💶 La sezione Premi non è ancora attiva.<br><small>'+(S.premiErr ? esc(S.premiErr) : "L'organizzatore deve condividere il foglio «Vincite».")+'</small></div>'; infoLine(0); return;
   }
   const rows = d.rows;
   if(!rows.length){ $("wrap").innerHTML = '<div id="msg">Nessun premio assegnato finora.</div>'; infoLine(0); return; }
