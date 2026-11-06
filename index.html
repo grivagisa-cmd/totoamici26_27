@@ -144,7 +144,9 @@ table.rt tr.ed td{padding:6px 10px 14px;background:rgba(255,212,0,.07)}
 .rw .ps{width:30px;text-align:center;font-weight:900;font-size:15px;color:var(--mut);flex:none}
 .rw.p1 .ps,.rw.p2 .ps,.rw.p3 .ps{color:#fff;font-size:17px}
 .rw .nm{flex:1;min-width:0;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rw .pt{font-weight:900;font-size:21px;color:var(--gold);min-width:36px;text-align:right}
+.rw .pt{font-weight:900;font-size:21px;color:var(--gold);min-width:36px;text-align:right;white-space:nowrap}
+.rw .pt small{font-size:12px;font-weight:700;color:#7df0b8;margin-left:5px}
+.cap b{color:#7df0b8}
 .rw .jk{min-width:40px;text-align:center;font-size:14px}
 .rw.p1{border-color:rgba(255,212,0,.65);background:linear-gradient(90deg,rgba(255,212,0,.25),var(--card))}
 .rw.p2{border-color:rgba(190,200,212,.6);background:linear-gradient(90deg,rgba(190,200,212,.22),var(--card))}
@@ -702,7 +704,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v36 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v37 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -725,6 +727,12 @@ function jollyCell(v){
 
 const chipsOf = (r, d, mx, sm) => '<div class="tcs'+(sm?" sm":"")+'">' + r.x[1].map((v,k)=>`<div class="tc${v===mx[k] && v>0 ? " mx" : ""}"><small>${esc(d.turni[k])}</small><b>${v}</b></div>`).join("") + "</div>";
 function toggleDet(){ showDet = !showDet; render(); }
+/* punti del concorso in corso (riga «Totale punti assegnati» del tabulato: 1X2 + risultato esatto + jolly) */
+function roundPts(){
+  const d = S.tabulato.data, m = {}; let has = false;
+  d.part.forEach(p=>{ const v = +p.tot || 0; m[norm(p.nome)] = v; if(v > 0) has = true; });
+  return {m:m, has:has, label:concLabel(d)};
+}
 function viewClassifica(){
   const q = norm($("q").value), d = S[KEYS[cur]].data;
   const isInt = cur===1;
@@ -733,12 +741,14 @@ function viewClassifica(){
   const mx = isInt ? d.turni.map((_,k)=>Math.max(...d.rows.map(x=>x[1][k]))) : [];
   const ptsOf = r => isInt ? r.x[2] : r.x[1];
   const list = all.filter(r=>!q || norm(r.x[0]).includes(q));
-  let h = `<div class="cap">${isInt ? 'Miglior punteggio di ogni turno in oro <button class="chip" onclick="toggleDet()">Turni ' + (showDet ? "✓" : "✗") + '</button>' : "J = jolly giocati"}</div>`;
+  const gd = isInt ? null : roundPts();
+  let h = `<div class="cap">${isInt ? 'Miglior punteggio di ogni turno in oro <button class="chip" onclick="toggleDet()">Turni ' + (showDet ? "✓" : "✗") + '</button>' : "J = jolly giocati" + (gd.has ? " · <b>+N</b> = punti " + (gd.label ? "del "+esc(gd.label) : "della giornata in corso") + " (con jolly e risultato esatto)" : "")}</div>`;
   list.forEach(r=>{
     h += `<div class="rw${r.n<=3?" p"+r.n:""}"><div class="ps">${r.n}</div>${av(r.x[0])}<div class="nm">${esc(r.x[0])}</div>`;
     if(isInt && showDet) h += chipsOf(r,d,mx,false);
     if(!isInt) h += `<div class="jk">${jollyCell(r.x[2])}</div>`;
-    h += `<div class="pt">${ptsOf(r)}</div></div>`;
+    const gv = gd && gd.has ? gd.m[norm(r.x[0])] : undefined;
+    h += `<div class="pt">${ptsOf(r)}${gv!==undefined ? "<small>+"+gv+"</small>" : ""}</div></div>`;
   });
   $("wrap").innerHTML = list.length ? h : '<div id="msg">Nessun partecipante trovato</div>';
   infoLine(q ? list.length : all.length);
