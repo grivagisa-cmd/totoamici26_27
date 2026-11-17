@@ -87,6 +87,8 @@ details.pp summary small{opacity:.55;font-weight:400}
 /* ===== tabulato nascosto ===== */
 .conc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 14px 0}
 .conc b{font-size:18px}
+.tsel{margin-left:auto;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 8px;font-size:13px;font-family:inherit;max-width:60%}
+.tsel option{color:#000}
 .conc span{opacity:.75;font-size:13px}
 .lock{margin:26px 14px;padding:24px 16px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:18px}
 .lock .lk{font-size:46px;line-height:1}
@@ -313,7 +315,7 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
   <div id="r_lock" class="lockbar" style="display:none">🔒 <b>Inserimento chiuso.</b> I risultati mostrati sono quelli confermati dall'organizzatore.</div>
   <div class="sec"><h3>Chi sei</h3>
     <label>Partecipante</label><select id="r_who"></select>
-    <label>Il tuo codice</label><input id="r_code" type="password" autocomplete="off" placeholder="codice ricevuto dall'organizzatore">
+    <label>Il tuo codice</label><input id="r_code" type="password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="codice ricevuto dall'organizzatore">
     <div class="hint">Ogni risultato inserito viene registrato con il tuo nome e l'orario.</div>
   </div>
   <div class="sec"><h3>Partite</h3>
@@ -455,7 +457,7 @@ const S = {
   intermedia: {live:false, data:{turni:["C1","C2","C3","C4"], rows:INTERMEDIA.map(r=>[r[0],[r[1],r[2],r[3],r[4]],r[5]])}},
   tabulato:   {live:false, data:{partite:PARTITE.map(l=>({label:l,ris:"",ex:"",who:"",esito:""})), part:P0}},
   premi: {live:false, data:{rows:[]}},
-  err:"", time:"", sheets:[], ready:false, skip:{}
+  err:"", time:"", sheets:[], ready:false, skip:{}, tabList:[], tabCache:{}, sel:null, tabScanT:0, tabScanning:false
 };
 /* ultimi dati letti dal foglio: usati solo se al prossimo avvio il foglio non risponde (mai mostrati prima della lettura) */
 function loadCache(){
@@ -704,7 +706,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v37 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v39 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -793,7 +795,7 @@ const esitoFromScore = x => { const m = sc2(x).match(/^(\d+)-(\d+)$/); return m 
 function buildM(d){
   const M = d.partite.map(m=>({...m, ...splitMatch(m.label), out: isOut(m.ex) ? showOut(m.ex) : (isOut(m.ris) ? showOut(m.ris) : "")}));
   M.forEach(m=>{   /* risultato appena inserito da questo dispositivo: per 15 minuti prevale su quanto letto dal foglio, così lo vedi subito */
-    const o = OVR[m.label]; if(!o || typeof o!=="object") return;
+    const o = OVR[m.label]; if(d !== S.tabulato.data || !o || typeof o!=="object") return;
     if(!(o.t && Date.now()-o.t < 15*60000)) return;
     m.out = isOut(o.x) ? showOut(o.x) : "";
     m.esito = /^[1X2]$/.test(t(o.e).toUpperCase()) ? t(o.e).toUpperCase() : "";
@@ -820,9 +822,46 @@ function outsBanner(M){
   return '<div class="outs">⚽ <b>Risultati usciti</b><br>' + o.map(m=>`<span class="oc">${esc(m.a)}–${esc(m.b)} <b>${esc(showOut(m.out))}</b></span>`).join("") + "</div>";
 }
 const concLabel = d => d.concNum ? "Concorso "+d.concNum : (d.concRaw || "");
+/* ---- concorsi precedenti: ogni tabulato salvato come foglio a parte compare nel selettore ---- */
+function curTab(){ return (S.sel && S.tabCache[S.sel]) ? S.tabCache[S.sel].data : S.tabulato.data; }
+function isPast(){ return !!(S.sel && S.tabCache[S.sel]); }
+function tabSelector(){
+  if(S.tabList.length < 2) return "";
+  const cur = isPast() ? S.sel : "cur";
+  return '<select class="tsel" onchange="selTab(this.value)" aria-label="Scegli il concorso">' + S.tabList.map(t=>{
+    const v = t.cur ? "cur" : t.gid;
+    return '<option value="'+esc(v)+'"'+(v===cur?" selected":"")+'>'+esc(t.label)+(t.cur?" · in corso":"")+'</option>';
+  }).join("") + '</select>';
+}
+function selTab(v){ S.sel = (v==="cur") ? null : v; render(); $("wrap").scrollTo(0,0); }
+async function scanTabs(){
+  if(S.tabScanning) return; S.tabScanning = true;
+  try{
+    if(!S.sheets.length) S.sheets = await discover();
+    const curGid = S.map && S.map.tabulato, mapped = Object.values(S.map||{});
+    const cache = Object.assign({}, S.tabCache), list = [];
+    for(const sh of S.sheets){
+      if(sh.gid===curGid || mapped.includes(sh.gid)) continue;
+      if(S.skip[sh.gid] && Date.now()-S.skip[sh.gid] < 30*60000) continue;
+      if(cache[sh.gid]){ const d0 = cache[sh.gid].data; list.push({gid:sh.gid, name:sh.name, num:+d0.concNum||0, label:d0.concNum ? "Concorso "+d0.concNum : sh.name, cur:false}); continue; }
+      try{
+        const d = parseTab(await csv(sh.gid));
+        if(d && d.part.length>=3){ cache[sh.gid] = {data:d}; list.push({gid:sh.gid, name:sh.name, num:+d.concNum||0, label:d.concNum ? "Concorso "+d.concNum : sh.name, cur:false}); }
+        else S.skip[sh.gid] = Date.now();
+      }catch(e){}
+    }
+    const cd = S.tabulato.data;
+    list.push({gid:curGid||"cur", name:"corrente", num:+cd.concNum||0, label:cd.concNum ? "Concorso "+cd.concNum : "Concorso attuale", cur:true});
+    list.sort((a,b)=>(b.num-a.num) || (b.cur-a.cur) || String(a.label).localeCompare(String(b.label),"it"));
+    S.tabList = list.length>1 ? list : []; S.tabCache = cache;
+  }catch(e){}
+  S.tabScanT = Date.now(); S.tabScanning = false;
+  if(cur===2) render();
+}
 function concHeader(d){
-  const l = concLabel(d); if(!l && !d.dataConc) return "";
-  return '<div class="conc"><b>'+esc(l)+'</b>'+(d.dataConc ? '<span>'+esc(d.dataConc)+'</span>' : "")+'</div>';
+  const l = concLabel(d), sel = tabSelector();
+  if(!l && !d.dataConc && !sel) return "";
+  return '<div class="conc"><b>'+esc(l)+'</b>'+(d.dataConc ? '<span>'+esc(d.dataConc)+'</span>' : "")+(isPast() ? '<span>archivio</span>' : "")+sel+'</div>';
 }
 /* ===== sezione Premi ===== */
 let pv = "g";
@@ -875,13 +914,14 @@ function viewPremi(){
   infoLine(rows.length);
 }
 function viewTabulato(){
+  if(!S.tabScanning && Date.now()-S.tabScanT > 30*60000){ S.tabScanT = Date.now(); scanTabs(); }   /* cerca i tabulati dei concorsi precedenti (al massimo ogni 30 minuti) */
   const ti = tabInfo();
-  if(!ti.visible){ viewLock(ti); return; }
+  if(!isPast() && !ti.visible){ viewLock(ti); return; }
   if(tv==="m") viewPartite(); else viewPartecipanti();
 }
 
 function viewPartecipanti(){
-  const q = norm($("q").value), d = S.tabulato.data;
+  const q = norm($("q").value), d = curTab();
   const M = buildM(d);
   const part = d.part.map((p,i)=>({p,i})).filter(o=>!q || norm(o.p.nome).includes(q));
   let h = concHeader(d) + seg() + hitsBanner(d, M) + outsBanner(M);
@@ -918,7 +958,7 @@ function viewPartecipanti(){
 }
 
 function viewPartite(){
-  const q = norm($("q").value), d = S.tabulato.data;
+  const q = norm($("q").value), d = curTab();
   const M = buildM(d);
   const tot = d.part.length || 1;
   let h = concHeader(d) + seg() + hitsBanner(d, M) + outsBanner(M);
@@ -1024,7 +1064,7 @@ function tabInfo(){
 function viewLock(ti){
   const pct = ti.expected ? Math.min(100, Math.round(ti.delivered*100/ti.expected)) : 0;
   const u = curLink(), link = /^https?:\/\//i.test(u) ? u : "";
-  let h = '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(concLabel(S.tabulato.data) || ti.turno)+' non ancora visibile</h2>';
+  let h = (S.tabList.length>1 ? '<div class="conc">'+tabSelector()+'</div>' : '') + '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(concLabel(S.tabulato.data) || ti.turno)+' non ancora visibile</h2>';
   h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti i '+ti.expected+' partecipanti avranno consegnato i pronostici.</p>';
   if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+ti.delivered+' su '+ti.expected+'</div>';
   if(link) h += '<a class="btnl" href="'+esc(link)+'" target="_blank" rel="noopener">📝 Inserisci i pronostici</a>';
@@ -1116,13 +1156,19 @@ async function saveRis(i, clear){
       else ev = esitoFromScore(x);
     }
   }
-  ME = {n:who, c:code}; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(e){}
   const q = url + (url.includes("?") ? "&" : "?") + "action=res&who="+encodeURIComponent(who)+"&code="+encodeURIComponent(code)+"&label="+encodeURIComponent(m.label)+"&n="+(i+1)+"&x="+encodeURIComponent(x)+"&e="+encodeURIComponent(ev);
   risMsg("⏳ Invio…");
   let whoTxt = "", note = "";
   try{
     const r = await fetch(q); const j = await r.json();
-    if(!j.ok){ risMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    if(!j.ok){
+      if(/codice errato/i.test(j.error||"")){
+        ME.c = ""; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(e){}
+        risMsg("⚠️ <b>Codice errato.</b> Controlla di averlo scritto giusto (te lo ha dato l'organizzatore) e riprova.");
+      } else risMsg("⚠️ "+esc(j.error||"errore sconosciuto"));
+      return;
+    }
+    ME = {n:who, c:code}; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(e){}      /* ricordo nome e codice solo se erano giusti */
     whoTxt = (x==="-" && ev==="-") ? "" : (j.who || ""); note = "Salvato.";
   }catch(err){
     try{ await fetch(q, {mode:"no-cors"}); whoTxt = (x==="-" && ev==="-") ? "" : nowWho(who); note = "Inviato, ma il server non ha dato conferma: controlla che compaia in tabella."; }
@@ -1218,7 +1264,7 @@ function initInstall(){
 function render(){
   fillAdm(); updLink();
   if($("ris").classList.contains("open") && EDIT<0) renderRis();
-  { const dd = S.tabulato.data; $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"+(dd.concNum ? " · C"+dd.concNum : ""),"Premi"][cur]; }
+  { const dd = curTab(); $("ttl").textContent = ["Classifica finale","Classifica intermedia","Tabulato"+(dd.concNum ? " · C"+dd.concNum : ""),"Premi"][cur]; }
   $("ico2").textContent = tabInfo().visible ? "📋" : "🔒";
   document.querySelectorAll(".di[data-go]").forEach(b=>b.classList.toggle("on", +b.dataset.go===cur));
   if(!S.ready){
