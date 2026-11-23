@@ -115,6 +115,21 @@ details.pp summary small{opacity:.55;font-weight:400}
 #ris input,#ris select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
 #ris .hint{opacity:.8;margin:2px 0 4px;line-height:1.35}
 #r_msg{display:none;position:sticky;top:0;z-index:3;margin:8px 0;padding:9px 12px;border-radius:10px;background:#0e4a31;border:1px solid var(--gold);font-size:13px;line-height:1.4}
+#my label{display:block;margin:8px 0 2px;font-weight:700}
+#my input,#my select{width:100%;padding:10px 12px;border-radius:10px;border:0;font-size:15px}
+#my .hint{opacity:.8;margin:4px 0;line-height:1.35}
+#my_msg{display:none;position:sticky;top:0;z-index:3;margin:8px 0;padding:9px 12px;border-radius:10px;background:#0e4a31;border:1px solid var(--gold);font-size:13px;line-height:1.4}
+table.mytb{width:100%;border-collapse:collapse}
+.mytb td{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:middle}
+.mytb td.mn{width:26px;opacity:.55;font-size:13px}
+.mytb td.ml{font-size:14px;line-height:1.25}
+.mytb td.ml small{opacity:.6;font-size:11px}
+.mytb td.mp{white-space:nowrap;text-align:right}
+.pkb{width:42px;height:38px;margin-left:5px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:16px;font-weight:800;font-family:inherit}
+.pkb.on{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+.pkb:disabled{opacity:.45}
+.pkb.on:disabled{opacity:.85}
+.dirty{color:var(--gold);font-weight:700;font-size:13px;margin:6px 0}
 .lockbar{margin:8px 0;padding:10px 12px;border-radius:12px;background:rgba(220,70,70,.18);border:1px solid rgba(255,120,120,.6);font-size:13px;line-height:1.4}
 table.rt tr.tap{cursor:pointer}
 table.rt tr.tap:active td,table.rt tr.sel td{background:rgba(255,212,0,.13)}
@@ -257,6 +272,7 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <button class="di" data-go="2"><span id="ico2">📋</span>Tabulato</button>
     <button class="di" data-go="3"><span>💶</span>Premi</button>
     <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
+    <button class="di" id="dMy"><span>🎯</span>Il mio pronostico</button>
     <button class="di" id="dRis"><span>⚽</span>Inserisci risultati</button>
     <div class="dsep">App</div>
     <button class="di" id="dFull"><span>⛶</span>Schermo intero</button>
@@ -284,6 +300,11 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <label>Risultato finale (1 / X / 2) <small style="font-weight:400;opacity:.75">— "Automatico" lo ricava dal punteggio; con ALTRO sceglilo tu</small></label>
     <select id="a_e"><option value="">Automatico</option><option value="1">1</option><option value="X">X</option><option value="2">2</option><option value="-">-</option></select>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="b full" id="a_s">💾 Salva risultato</button><button class="b" id="a_c">🗑 Azzera partita</button></div>
+  </div>
+  <div class="sec"><h3>📝 Pronostici (modulo Google)</h3>
+    <div class="hint"><b>Aperti</b>: i partecipanti possono inviare il pronostico e modificarlo dal link "Modifica la tua risposta". <b>Chiusi</b>: il modulo non accetta più risposte né modifiche e il tabulato si sblocca. Se hai scritto l'indirizzo del modulo in <code>FORM_URL</code> nello script, lo chiude e lo riapre da solo.</div>
+    <select id="a_pr"><option value="open">Aperti</option><option value="closed">Chiusi</option></select>
+    <div style="margin-top:10px"><button class="b" id="a_prs">📝 Salva</button></div>
   </div>
   <div class="sec"><h3>🔒 Inserimento dei partecipanti</h3>
     <div class="hint"><b>Aperto</b>: i partecipanti possono inserire i risultati (tracciati con nome e orario). <b>Bloccato</b>: nessuno può più inserire o modificare, restano solo i risultati confermati da te.<br>I risultati che inserisci tu da qui sono <b>sempre confermati</b>: i partecipanti non possono più cambiarli (se li azzeri tornano modificabili).</div>
@@ -322,6 +343,17 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <div class="hint">Tocca una riga per inserire o correggere il risultato.</div>
     <div class="lgw" id="r_tab"></div>
   </div>
+</div>
+<div id="my" class="modal">
+  <div class="mhd"><h2>🎯 Il mio pronostico</h2><button class="mx" id="myClose" aria-label="Chiudi">✕</button></div>
+  <div id="my_msg"></div>
+  <div class="sec"><h3>Chi sei</h3>
+    <label>Partecipante</label><select id="my_who"></select>
+    <label>Il tuo codice</label><input id="my_code" type="password" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="codice ricevuto dall'organizzatore">
+    <div style="margin-top:10px"><button class="b full" id="my_load">📥 Mostra il mio pronostico</button></div>
+    <div class="hint">Vedi solo il tuo pronostico. Gli altri restano nascosti fino alla chiusura del concorso.</div>
+  </div>
+  <div id="my_body"></div>
 </div>
 <div id="toast"></div>
 
@@ -397,7 +429,7 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbyYA2-0Ej9GAuc-WPTYh5W7GTUABq4-MazPFBLfZTvYKX7rrHixPNUUZRDyxIqoDv0/exec",
+  WEBAPP: "",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio (riga 60, colonna B).
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 60, col: "B" },
@@ -415,6 +447,11 @@ const CONFIG = {
   /* numero del concorso (cella C2 del tabulato) e date del concorso (testo libero, es. "Sab 25 – Lun 27 ottobre", cella F60) */
   CONCORSO: { row: 2, col: "C" },
   DATA: { row: 60, col: "F" },
+  /* stato dei pronostici (G60: "chiusi" = il modulo Google non accetta più risposte né modifiche) */
+  PRON: { row: 60, col: "G" },
+  /* quando si sblocca il tabulato in modalità automatica: "chiusura" = solo quando chiudi i pronostici (consigliato se i partecipanti possono modificare);
+     "tutti" = anche quando tutti hanno consegnato */
+  TAB_UNLOCK: "chiusura",
   /* sezione Premi: mostrare anche se un premio è già stato pagato (colonna "Pagato?" del foglio Vincite) */
   PREMI_MOSTRA_PAGATO: false,
   /* foglio dei premi: è un documento Google a parte ("Distribuzione Premi Totoamici 2026-27"), condiviso come «chiunque abbia il link può visualizzare» */
@@ -566,7 +603,8 @@ function parseTab(rows){
   const webapp = /^https:\/\/script\.google\.com\//i.test(wl) ? wl : "";
   const lk = t((rows[CONFIG.LOCK.row-1]||[])[colIdx(CONFIG.LOCK.col)]).toLowerCase();
   const locked = /^(bloccat|chiuso|closed)/.test(lk);
-  return {partite, part, link, linkRaw, turno, concRaw, concNum, dataConc, mode, webapp, locked, dbg:{labelCol, resultCol, start}};
+  const pronClosedCell = /^(chius|closed)/.test(t((rows[CONFIG.PRON.row-1]||[])[colIdx(CONFIG.PRON.col)]).toLowerCase());
+  return {partite, part, link, linkRaw, turno, concRaw, concNum, dataConc, mode, webapp, locked, pronClosed:pronClosedCell, dbg:{labelCol, resultCol, start}};
 }
 
 /* rete: prima diretta, poi tramite proxy (alcune pagine Google non ammettono la lettura diretta dal browser) */
@@ -706,7 +744,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v40 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v42 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -1023,9 +1061,16 @@ function curLink(){
   return (d && d.link) || CONFIG.FORM_URL || "";
 }
 function updLink(){
-  const a = $("lForm"), d = $("dForm"), u = curLink(), ok = /^https?:\/\//i.test(u);
-  a.style.display = ok ? "inline-flex" : "none"; d.style.display = ok ? "flex" : "none";
-  if(ok){ a.href = u; d.href = u; }
+  const a = $("lForm"), d = $("dForm"), u = curLink(), ok = /^https?:\/\//i.test(u), closed = pronClosed();
+  a.style.display = (ok || closed) ? "inline-flex" : "none"; d.style.display = (ok || closed) ? "flex" : "none";
+  a.textContent = closed ? "🔒 Pronostici chiusi" : "📝 Pronostici";
+  d.innerHTML = closed ? "<span>🔒</span>Pronostici chiusi" : "<span>📝</span>Inserisci pronostici";
+  if(closed){
+    const stop = e=>{ e.preventDefault(); try{ closeDrawer(); }catch(x){} toast("I pronostici di questo concorso sono chiusi"); };
+    a.onclick = stop; d.onclick = stop; a.href = "#"; d.href = "#";
+  } else if(ok){
+    a.onclick = null; d.onclick = ()=>closeDrawer(); a.href = u; d.href = u;
+  }
 }
 async function sendLink(){
   const url = ($("a_u").value.trim() || webappUrl()), pwd = $("a_p").value, link = $("a_l").value.trim();
@@ -1049,6 +1094,34 @@ async function sendLink(){
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
 }
 function webappUrl(){ const d = S.tabulato && S.tabulato.data; return CONFIG.WEBAPP || (d && d.webapp) || ""; }
+let PRONOVR = null;
+try{ PRONOVR = JSON.parse(localStorage.getItem("toto_pron")||"null"); }catch(e){}
+/* pronostici chiusi? (il modulo Google non accetta più risposte né modifiche) */
+function pronClosed(){
+  const d = S.tabulato.data;
+  const v = (PRONOVR && Date.now()-PRONOVR.t < 15*60000) ? PRONOVR.v : (d.pronClosed ? "closed" : "open");
+  return v === "closed";
+}
+async function sendPron(){
+  const url = ($("a_u").value.trim() || webappUrl()), pwd = $("a_p").value, m = $("a_pr").value;
+  if(!url){ admMsg("⚠️ Inserisci prima l'indirizzo del modulo (Apps Script)."); return; }
+  try{ localStorage.setItem("toto_adm", JSON.stringify({u:url, p:pwd})); }catch(e){}
+  const q = url + (url.includes("?") ? "&" : "?") + "pwd="+encodeURIComponent(pwd)+"&action=pron&mode="+encodeURIComponent(m);
+  admMsg("⏳ Invio…");
+  let note = "";
+  try{
+    const r = await fetch(q); const j = await r.json();
+    if(!j.ok){ admMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return; }
+    note = "Stato salvato nel foglio (cella "+esc(j.cell||"")+"). Modulo Google: <b>"+esc(j.modulo||"?")+"</b>.";
+  }catch(e){
+    try{ await fetch(q, {mode:"no-cors"}); note = "Inviato, ma il server non ha dato conferma: controlla il foglio e il modulo Google."; }
+    catch(e2){ admMsg("⚠️ Impossibile contattare il modulo: "+esc(e2.message)); return; }
+  }
+  PRONOVR = {v:m, t:Date.now()};
+  try{ localStorage.setItem("toto_pron", JSON.stringify(PRONOVR)); }catch(e){}
+  render();
+  admMsg("✅ "+note+" "+(m==="closed" ? "I partecipanti non possono più inviare né modificare i pronostici e il tabulato si sblocca." : "I partecipanti possono di nuovo inviare e modificare i pronostici."));
+}
 let LOCKOVR = null;
 try{ LOCKOVR = JSON.parse(localStorage.getItem("toto_lock")||"null"); }catch(e){}
 /* inserimento dei partecipanti chiuso dall'organizzatore? */
@@ -1095,13 +1168,13 @@ function tabInfo(){
   const delivered = done.size;
   const missing = roster.filter(n=>!done.has(norm(n)));
   return {mode, delivered, expected, total:expected, missing, unknown:Math.max(0, expected-roster.length), turno:d.turno||"",
-          visible: mode==="show" || (mode==="auto" && delivered>=expected)};
+          visible: mode==="show" || (mode==="auto" && (pronClosed() || (CONFIG.TAB_UNLOCK==="tutti" && delivered>=expected)))};
 }
 function viewLock(ti){
   const pct = ti.expected ? Math.min(100, Math.round(ti.delivered*100/ti.expected)) : 0;
   const u = curLink(), link = /^https?:\/\//i.test(u) ? u : "";
   let h = (S.tabList.length>1 ? '<div class="conc">'+tabSelector()+'</div>' : '') + '<div class="lock"><div class="lk">🔒</div><h2>Tabulato '+esc(concLabel(S.tabulato.data) || ti.turno)+' non ancora visibile</h2>';
-  h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>Sarà visibile quando tutti i '+ti.expected+' partecipanti avranno consegnato i pronostici.</p>';
+  h += ti.mode==="hide" ? '<p>Il tabulato è stato nascosto dall\'organizzatore.</p>' : '<p>'+(CONFIG.TAB_UNLOCK==="tutti" ? 'Sarà visibile quando tutti i '+ti.expected+' partecipanti avranno consegnato i pronostici (o alla chiusura).' : 'Sarà visibile alla chiusura dei pronostici: fino ad allora puoi ancora modificare il tuo.')+'</p>';
   if(ti.mode!=="hide") h += '<div class="prog"><i style="width:'+pct+'%"></i></div><div class="cnt">Consegnati '+ti.delivered+' su '+ti.expected+'</div>';
   if(link) h += '<a class="btnl" href="'+esc(link)+'" target="_blank" rel="noopener">📝 Inserisci i pronostici</a>';
   if(ADMIN && (ti.missing.length || ti.unknown)) h += '<div class="adm"><b>Solo per te (admin) — mancano '+Math.max(0, ti.expected-ti.delivered)+':</b><br>'+ti.missing.map(esc).join(", ")+(ti.unknown ? (ti.missing.length?" + ":"")+ti.unknown+" non identificat"+(ti.unknown===1?"o":"i") : "")+'</div>';
@@ -1128,6 +1201,98 @@ async function sendTabMode(){
   render();
   admMsg("✅ "+note+" Gli altri lo vedranno appena Google aggiorna il foglio pubblicato (di solito pochi minuti).");
 }
+/* ===== il mio pronostico: ogni giocatore vede e modifica solo il proprio, fino alla chiusura ===== */
+let MY = null;
+const myMsg = x => { const m = $("my_msg"); m.innerHTML = x; m.style.display = x ? "block" : "none"; };
+const myState = () => JSON.stringify([MY.picks, MY.bn, MY.bx, MY.jolly]);
+async function myCall(params){
+  const url = webappUrl(); if(!url) throw new Error("manca l'indirizzo del modulo (lo imposta l'organizzatore)");
+  const q = url + (url.includes("?") ? "&" : "?") + Object.keys(params).map(k=>k+"="+encodeURIComponent(params[k])).join("&") + "&t="+Date.now();
+  return await (await fetch(q)).json();          /* niente servizi intermedi: il codice non passa da terzi */
+}
+function openMy(){
+  closeDrawer(); $("my").classList.add("open");
+  const sel = $("my_who"), names = rosterNames(), sig = names.join("|");
+  if(sel.dataset.sig !== sig){
+    sel.dataset.sig = sig;
+    sel.innerHTML = '<option value="">— scegli il tuo nome —</option>' + names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  }
+  if(ME.n && names.includes(ME.n)) sel.value = ME.n;
+  $("my_code").value = ME.c || ""; myMsg("");
+  if(!MY && ME.n && ME.c) loadMy(); else if(MY) renderMy();
+}
+function closeMy(){ $("my").classList.remove("open"); }
+async function loadMy(){
+  const who = $("my_who").value, code = t($("my_code").value);
+  if(!who){ myMsg("⚠️ Scegli il tuo nome."); return; }
+  if(!code){ myMsg("⚠️ Inserisci il tuo codice."); return; }
+  myMsg("⏳ Carico il tuo pronostico…");
+  let j;
+  try{ j = await myCall({action:"mypick", who:who, code:code}); }
+  catch(e){ myMsg("⚠️ "+esc(e.message || "Impossibile contattare il modulo")); return; }
+  if(!j.ok){
+    if(/codice errato/i.test(j.error||"")){ ME.c = ""; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(x){}; myMsg("⚠️ <b>Codice errato.</b> Controlla di averlo scritto giusto (te lo ha dato l'organizzatore) e riprova."); }
+    else myMsg("⚠️ "+esc(j.error||"errore sconosciuto"));
+    return;
+  }
+  ME = {n:who, c:code}; try{ localStorage.setItem("toto_me", JSON.stringify(ME)); }catch(x){}
+  myMsg("");
+  if(!j.found){
+    MY = null; const u = curLink();
+    $("my_body").innerHTML = '<div class="sec"><h3>Concorso '+esc(j.conc||"")+'</h3><div class="hint">Non risulta ancora un tuo pronostico per questo concorso. '+(j.closed ? "I pronostici sono chiusi." : "Invialo dal modulo Google: poi potrai vederlo e modificarlo qui.")+'</div>'+
+      (!j.closed && /^https?:\/\//i.test(u) ? '<a class="btnl" style="display:inline-block;margin-top:8px" href="'+esc(u)+'" target="_blank" rel="noopener">📝 Vai al modulo</a>' : "")+'</div>';
+    return;
+  }
+  MY = {who:j.who, conc:j.conc, closed:!!j.closed, matches:j.matches, picks:j.picks.slice(), bn:j.sceltaN||0, bx:j.bonus||"", jolly:j.jolly||"NO", ts:j.ts||""};
+  MY.orig = myState(); renderMy();
+}
+function setPk(i,v){ if(!MY || MY.closed) return; MY.picks[i] = v; renderMy(); }
+function setJolly(v){ if(!MY || MY.closed) return; MY.jolly = v; renderMy(); }
+function renderMy(){
+  const M = MY, dis = M.closed ? " disabled" : "";
+  let h = '<div class="sec"><h3>Concorso '+esc(M.conc||"")+'</h3>';
+  h += M.closed ? '<div class="lockbar">🔒 <b>Pronostici chiusi.</b> Puoi solo consultare il tuo pronostico.</div>'
+                : '<div class="hint">Puoi modificare il tuo pronostico fino alla chiusura del concorso, decisa dall\'organizzatore. Ogni modifica viene registrata.</div>';
+  if(M.ts) h += '<div class="hint">Primo invio dal modulo: '+esc(M.ts)+'</div>';
+  h += '<table class="mytb"><tbody>';
+  M.matches.forEach((m,i)=>{
+    const sm = splitMatch(m.label || "");
+    h += `<tr><td class="mn">${i+1}</td><td class="ml"><small>${esc(sm.when)}</small><br><b>${esc(sm.teams)}</b></td><td class="mp">` +
+         ["1","X","2"].map(v=>`<button class="pkb${M.picks[i]===v?" on":""}"${dis}${M.closed ? "" : ` onclick="setPk(${i},'${v}')"`}>${v}</button>`).join("") + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  const scores = SCORES.concat(["ALTRO"]); if(M.bx && !scores.includes(M.bx)) scores.push(M.bx);
+  h += '<div class="sec"><h3>🎯 Risultato esatto (bonus)</h3><label>Partita scelta</label><select'+dis+' onchange="MY.bn=+this.value;renderMy()">' +
+       '<option value="0"'+(M.bn?"":" selected")+'>— scegli —</option>' +
+       M.matches.map((m,i)=>`<option value="${i+1}"${M.bn===i+1?" selected":""}>#${i+1} · ${esc(splitMatch(m.label||"").teams)}</option>`).join("") + '</select>' +
+       '<label>Risultato esatto</label><select'+dis+' onchange="MY.bx=this.value;renderMy()"><option value=""'+(M.bx?"":" selected")+'>— scegli —</option>' +
+       scores.map(v=>`<option value="${esc(v)}"${M.bx===v?" selected":""}>${esc(v)}</option>`).join("") + '</select></div>';
+  h += '<div class="sec"><h3>🃏 Jolly</h3><div class="hint">Vuoi giocare il jolly in questo concorso?</div><div style="display:flex;gap:8px">' +
+       ["SI","NO"].map(v=>`<button class="pkb${M.jolly===v?" on":""}" style="width:auto;padding:0 18px"${dis}${M.closed ? "" : ` onclick="setJolly('${v}')"`}>${v==="SI"?"Sì":"No"}</button>`).join("") + '</div></div>';
+  if(!M.closed){
+    h += (myState() !== M.orig ? '<div class="dirty">● Modifiche non ancora salvate</div>' : "") +
+         '<div style="margin:10px 0 24px"><button class="b full" onclick="saveMy()">💾 Salva le modifiche</button></div>';
+  }
+  $("my_body").innerHTML = h;
+}
+async function saveMy(){
+  if(!MY || MY.closed) return;
+  const picks = MY.picks.join("");
+  if(!/^[1X2]{14}$/.test(picks)){ myMsg("⚠️ Completa tutti i 14 segni (1, X o 2) prima di salvare."); return; }
+  if(!(MY.bn >= 1 && MY.bn <= 14)){ myMsg("⚠️ Scegli la partita del risultato esatto."); return; }
+  if(!MY.bx){ myMsg("⚠️ Scegli il risultato esatto."); return; }
+  myMsg("⏳ Salvo…");
+  let j;
+  try{ j = await myCall({action:"setpick", who:MY.who, code:ME.c || t($("my_code").value), picks:picks, n:MY.bn, x:MY.bx, jolly:MY.jolly}); }
+  catch(e){ myMsg("⚠️ "+esc(e.message || "Impossibile contattare il modulo")); return; }
+  if(!j.ok){
+    if(/chius/i.test(j.error||"")){ MY.closed = true; renderMy(); }
+    myMsg("⚠️ "+esc(j.error||"errore sconosciuto")); return;
+  }
+  MY.orig = myState(); renderMy();
+  myMsg("✅ <b>Salvato.</b> Il tuo pronostico nel foglio è stato aggiornato"+(j.cambi ? " ("+j.cambi+(j.cambi===1?" modifica":" modifiche")+")" : " (nessuna differenza)")+". Puoi cambiarlo ancora fino alla chiusura.");
+}
+
 /* ===== inserimento dei risultati da parte dei partecipanti (tracciato: orario e nome) ===== */
 let EDIT = -1, ME = {n:"", c:""};
 try{ ME = Object.assign(ME, JSON.parse(localStorage.getItem("toto_me")||"{}")); }catch(e){}
@@ -1329,7 +1494,7 @@ function checkHash(){
 document.querySelectorAll(".di[data-go]").forEach(b=>{ b.onclick = ()=>go(+b.dataset.go); });
 $("bMenu").onclick = openDrawer; $("dClose").onclick = closeDrawer; $("dov").onclick = closeDrawer;
 $("dForm").onclick = closeDrawer;
-document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeAdm(); closeRis(); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeDrawer(); closeAdm(); closeRis(); closeMy(); } });
 $("bSrch").onclick = ()=>{
   const r=$("r2"), open = r.style.display==="flex";
   r.style.display = open ? "none" : "flex";
@@ -1348,6 +1513,7 @@ $("dAdm").onclick = openAdm;
 $("dLock").onclick = ()=>{ setAdmin(false); closeAdm(); closeDrawer(); toast("🔒 Modalità admin disattivata"); };
 $("aClose").onclick = closeAdm;
 $("dRis").onclick = openRis; $("rClose").onclick = closeRis;
+$("dMy").onclick = openMy; $("myClose").onclick = closeMy; $("my_load").onclick = loadMy;
 setAdmin(ADMIN);
 checkHash();
 window.addEventListener("hashchange", checkHash);
@@ -1361,12 +1527,13 @@ $("bSave").onclick = ()=>{
   try{ localStorage.setItem("toto_gid", JSON.stringify(CONFIG.GID)); }catch(e){}
   loadAll(); toast("✅ Fogli salvati");
 };
-autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm").classList.contains("open") || $("ris").classList.contains("open") || document.activeElement===$("q"));
+autoHide($("hd"), $("wrap"), ()=> $("drw").classList.contains("open") || $("adm").classList.contains("open") || $("ris").classList.contains("open") || $("my").classList.contains("open") || document.activeElement===$("q"));
 $("a_s").onclick = ()=>sendRes(false);
 $("a_c").onclick = ()=>sendRes(true);
 $("a_ls").onclick = ()=>sendLink();
 $("a_ts").onclick = ()=>sendTabMode();
 $("a_lks").onclick = ()=>sendLock();
+$("a_prs").onclick = ()=>sendPron();
 try{ const g = JSON.parse(localStorage.getItem("toto_adm")||"{}"); $("a_u").value = g.u || CONFIG.WEBAPP; $("a_p").value = g.p||""; }catch(e){ $("a_u").value = CONFIG.WEBAPP; }
 if(!$("a_u").value) $("a_u").value = CONFIG.WEBAPP;
 try{ if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){}
