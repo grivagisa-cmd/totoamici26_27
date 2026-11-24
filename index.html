@@ -542,7 +542,7 @@ function normLink(x){
   return "";
 }
 function parseTab(rows){
-  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=1) mr.push(i); });
+  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
   if(!mr.length) return null;
   const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
   const first = blk[0], last = blk[blk.length-1];
