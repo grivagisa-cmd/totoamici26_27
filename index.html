@@ -563,7 +563,7 @@ function parseTab(rows){
   const concNum = (concRaw.match(/\d+/)||[""])[0];
   const dataConc = t((rows[CONFIG.DATA.row-1]||[])[colIdx(CONFIG.DATA.col)]);
   const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
-  if(cols.length<1) return null;
+  if(cols.length<3) return null;
   const partite = blk.map(i=>{
     let ris = resultCol>=0 ? t(rows[i][resultCol]) : "";
     const raw = ris;
