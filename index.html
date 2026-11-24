@@ -424,12 +424,12 @@ const CONFIG = {
   BASE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6XtbY4S0WB59_Cxe0vByMR91d-XXZ4cx6HGMBUa6hqlomWmEh55xcza0LOhECKMRQ8RElSGCSUUB/pub",
   /* gid dei fogli: se lasci vuoto, la pagina prova a trovarli dal nome del foglio */
   GID:   { finale:"", intermedia:"", tabulato:"", premi:"" },
-  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat|^c\d+\s*tab$/i, premi:/vincit|premi/i },
+  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat/i, premi:/vincit|premi/i },
   REFRESH: 60,
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbxtMK6E-Zo3jB52sDVgLp82J929TATdiuUeXu4XiIYJmyba9lG9wtqEG8Kl8wga-iZC/exec",
+  WEBAPP: "",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio (riga 60, colonna B).
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 60, col: "B" },
@@ -542,10 +542,7 @@ function normLink(x){
   return "";
 }
 function parseTab(rows){
-  let mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
-  if(!mr.length){
-    rows.forEach((r,i)=>{ if(r.slice(0,3).some(c=>/\S\s+-\s+\S/.test(t(c)))) mr.push(i); });
-  }
+  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
   if(!mr.length) return null;
   const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
   const first = blk[0], last = blk[blk.length-1];
@@ -700,14 +697,11 @@ async function loadAllInner(){
         if(c) (cand[c[0]] = cand[c[0]] || []).push({gid:sh.gid, name:sh.name, data:c[1]}); else S.skip[sh.gid] = Date.now();
       }catch(e){ S.lastErr = "gid "+sh.gid+": "+e.message; }
     }
-  for(const k of missing){
+    for(const k of missing){
       const list = cand[k] || [];
-      if(k === "tabulato"){
-        list.sort((a,b)=>{
-          const na = parseInt((a.name.match(/c\s*(\d+)/i)||[])[1]||"0", 10);
-          const nb = parseInt((b.name.match(/c\s*(\d+)/i)||[])[1]||"0", 10);
-          return nb - na;
-        }
+      const pick = list.find(x=>CONFIG.NAMES[k].test(x.name)) || list[0];
+      if(pick){ S.map[k]=pick.gid; S[k]={live:true, data:pick.data}; fresh[k]=true; }
+    }
   }
   for(const k of KS){
     if(fresh[k]) continue;
