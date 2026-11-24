@@ -424,7 +424,7 @@ const CONFIG = {
   BASE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6XtbY4S0WB59_Cxe0vByMR91d-XXZ4cx6HGMBUa6hqlomWmEh55xcza0LOhECKMRQ8RElSGCSUUB/pub",
   /* gid dei fogli: se lasci vuoto, la pagina prova a trovarli dal nome del foglio */
   GID:   { finale:"", intermedia:"", tabulato:"", premi:"" },
-  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat/i, premi:/vincit|premi/i },
+  NAMES: { finale:/final/i, intermedia:/interm/i, tabulato:/tabulat|^c\d+\s*tab$/i, premi:/vincit|premi/i },
   REFRESH: 60,
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
