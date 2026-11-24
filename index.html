@@ -551,7 +551,7 @@ function parseTab(rows){
     const n = rows[i].filter(c=>t(c) && !/^\d+$/.test(t(c))).length;
     if(n>best){ best=n; nameRow=rows[i]; }
   }
-  if(!nameRow || best<1) return null;
+  if(!nameRow || best<3) return null;
   let labelCol=0, len=-1;
   rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
   let start = labelCol+1, resultCol = -1;
