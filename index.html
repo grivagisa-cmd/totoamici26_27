@@ -429,7 +429,7 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbzBXyzKUBXU8EP1dOZaDkA7QC9knz3cY3HlK7LF6oNBhrAFQ3xu66qPi0QYyHVVNZ9y/exec",
+  WEBAPP: "",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio (riga 60, colonna B).
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 60, col: "B" },
@@ -542,26 +542,28 @@ function normLink(x){
   return "";
 }
 function parseTab(rows){
-  let mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
-  if(!mr.length){
-    rows.forEach((r,i)=>{ if(r.slice(0,3).some(c=>/\S\s+-\s+\S/.test(t(c)))) mr.push(i); });
-  }
+  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
   if(!mr.length) return null;
   const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
   const first = blk[0], last = blk[blk.length-1];
   let nameRow=null, best=-1;
-  for(let i=Math.max(0,first-5); i<first; i++){
+  for(let i=Math.max(0,first-4); i<first; i++){
     const n = rows[i].filter(c=>t(c) && !/^\d+$/.test(t(c))).length;
     if(n>best){ best=n; nameRow=rows[i]; }
   }
-  if(!nameRow || best<1) return null;
+  if(!nameRow || best<3) return null;
   let labelCol=0, len=-1;
   rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
   let start = labelCol+1, resultCol = -1;
   const hc = t(nameRow[start]);
   const isConc = x => /^(c|conc\.?|concorso)?\s*\d+$/i.test(x);
-  if(hc==="" || isConc(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }  const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
-  if(cols.length<1) return null;
+  if(hc==="" || isConc(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
+  const turno = isConc(hc) ? hc.toUpperCase() : "";
+  const concRaw = t((rows[CONFIG.CONCORSO.row-1]||[])[colIdx(CONFIG.CONCORSO.col)]) || (isConc(hc) ? hc : "");
+  const concNum = (concRaw.match(/\d+/)||[""])[0];
+  const dataConc = t((rows[CONFIG.DATA.row-1]||[])[colIdx(CONFIG.DATA.col)]);
+  const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
+  if(cols.length<3) return null;
   const partite = blk.map(i=>{
     let ris = resultCol>=0 ? t(rows[i][resultCol]) : "";
     const raw = ris;
@@ -697,7 +699,9 @@ async function loadAllInner(){
     }
     for(const k of missing){
       const list = cand[k] || [];
-      const pick = list.find(x=>CONFIG.NAMES[k].test(x.name)) || list[0];
+      /* tabulato in corso = quello con il numero di concorso più alto (C2 o numero nel nome del foglio, es. «C12 tab»); a parità il primo */
+      const sc = x => Math.max(+(x.data && x.data.concNum)||0, +(String(x.name).match(/\d+/)||[0])[0]||0);
+      const pick = k==="tabulato" ? list.slice().sort((a,b)=>sc(b)-sc(a))[0] : (list.find(x=>CONFIG.NAMES[k].test(x.name)) || list[0]);
       if(pick){ S.map[k]=pick.gid; S[k]={live:true, data:pick.data}; fresh[k]=true; }
     }
   }
@@ -742,7 +746,7 @@ function refreshInfo(){
 }
 function infoLine(n){
   const s = S[KEYS[cur]];
-  let h = "v42 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
+  let h = "v43 · "+n+(cur===3 ? " vincite" : " partecipanti")+" · " + (s.live ? "🟢 dal foglio, ore "+S.time : (s.cached ? "🕘 ultimi dati salvati ("+new Date(S.cacheT||Date.now()).toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})+")" : "⚪ dati incorporati"));
   if(!s.live && S.err) h += "<br>⚠️ "+esc(S.err) + (S.discErr ? "<br>"+esc(S.discErr)+"<br>👉 In alternativa tocca ⚙️ Fogli e inserisci i gid a mano." : "") + (S.sheets.length ? "<br>Fogli trovati: "+esc(S.sheets.map(x=>x.name+" (gid "+x.gid+")").join(", ")) : "");
   if(S.tabulato && S.tabulato.live && !curLink()){
     const d = S.tabulato.data;
@@ -899,6 +903,8 @@ async function scanTabs(){
           list.push({gid:(S.map&&S.map.tabulato)||"cur", name:"corrente", num:+cd0.concNum||0, label:cd0.concNum ? "Concorso "+cd0.concNum : "Concorso attuale", cur:true});
           list.sort((a,b)=>(b.num-a.num) || (b.cur-a.cur) || String(a.label).localeCompare(String(b.label),"it"));
           S.tabList = list.length>1 ? list : []; S.tabScanT = Date.now(); S.tabScanning = false;
+          const curNum0 = +(S.tabulato.data.concNum)||0, maxO = Math.max.apply(null, [0].concat(list.filter(x=>!x.cur).map(x=>x.num)));
+          if(maxO > curNum0 && S.map && S.map.tabulato){ delete S.map.tabulato; S.skip = {}; S.sheets = []; S.tabScanT = 0; await loadAll(); return; }   /* è comparso un concorso più recente */
           if(cur===2) render();
           return;
         }
@@ -922,6 +928,8 @@ async function scanTabs(){
     list.push({gid:curGid||"cur", name:"corrente", num:+cd.concNum||0, label:cd.concNum ? "Concorso "+cd.concNum : "Concorso attuale", cur:true});
     list.sort((a,b)=>(b.num-a.num) || (b.cur-a.cur) || String(a.label).localeCompare(String(b.label),"it"));
     S.tabList = list.length>1 ? list : []; S.tabCache = cache;
+    const curNum = +(S.tabulato.data.concNum)||0, maxOther = Math.max.apply(null, [0].concat(list.filter(x=>!x.cur).map(x=>x.num)));
+    if(maxOther > curNum && S.map && S.map.tabulato){ delete S.map.tabulato; S.skip = {}; S.sheets = []; S.tabScanT = 0; S.tabScanning = false; await loadAll(); return; }
   }catch(e){}
   S.tabScanT = Date.now(); S.tabScanning = false;
   if(cur===2) render();
