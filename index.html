@@ -270,6 +270,7 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <button class="di on" data-go="0"><span>🏆</span>Classifica finale</button>
     <button class="di" data-go="1"><span>📈</span>Classifica intermedia</button>
     <button class="di" data-go="2"><span id="ico2">📋</span>Tabulato</button>
+    <a class="di" href="confronto.html"><span>⚖️</span>Confronta pronostici</a>
     <button class="di" data-go="3"><span>💶</span>Premi</button>
     <a class="di" id="dForm" target="_blank" rel="noopener" style="display:none"><span>📝</span>Inserisci pronostici</a>
     <button class="di" id="dMy"><span>🎯</span>Il mio pronostico</button>
@@ -429,7 +430,7 @@ const CONFIG = {
   /* risultati esatti dei 14 incontri: riga 26, da D a Q (D26:Q26). Gli 1/X/2 stanno in C3:C16, le squadre in B3:B16 */
   EXACT: { row: 26, col: "D" },
   /* indirizzo del modulo (Apps Script, finisce con /exec): se lo scrivi qui non devi più inserirlo nella pagina */
-  WEBAPP: "https://script.google.com/macros/s/AKfycbyC05mM1kYUtJyyQ1JSLeAgOhQLltLEgotKrZ-Wjx6yWDG7Tgw8-rG5Y2vvRJTkfS24/exec",
+  WEBAPP: "https://script.google.com/macros/s/AKfycbyV5pZM-EMC2jBLHJu3w5ZI9QuZdNIXdKfE_7bQe9PI1QBrpgrYuIF-H4eivgB7MSyC/exec",
   /* link al modulo per inserire i pronostici (cambia ogni settimana). Si aggiorna dal pannello Admin e viene salvato nel foglio (riga 60, colonna B).
      Se la cella è vuota si usa FORM_URL (facoltativo, puoi lasciarlo vuoto). */
   FORM: { row: 60, col: "B" },

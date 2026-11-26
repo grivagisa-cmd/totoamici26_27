@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a3a27">
+<title>⚖️ Confronto pronostici · Super Totoamici</title>
+<style>
+:root{
+  --bg:#06130d; --card:#0f2a1f; --card2:#164232; --line:rgba(255,255,255,.1); --text:#eaf5ef;
+  --mut:rgba(234,245,239,.62); --gold:#ffd400; --green:#1fb673; --red:#e5484d; --amber:#e0a21a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;color:var(--text);font-family:system-ui,-apple-system,Roboto,Arial,sans-serif;
+  background:radial-gradient(1100px 520px at 50% -8%,#0f4a31 0,#06130d 62%) fixed,#06130d}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:8px 10px;
+  background:linear-gradient(180deg,#0e5236,#0a3a27);box-shadow:0 2px 10px rgba(0,0,0,.55)}
+header a.back{flex:none;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.32);display:grid;place-items:center;
+  color:#fff;text-decoration:none;font-size:18px}
+header h1{flex:1;min-width:0;margin:0;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header select{flex:none;max-width:46%;height:34px;border-radius:17px;border:0;background:#1d5b43;padding:0 12px;font-weight:700;font-size:13px}
+header select option{color:#111}
+#st{font-size:11px;opacity:.8;padding:4px 12px;min-height:20px}
+
+main{padding:10px 10px 28px;max-width:1400px;margin:0 auto}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+.pn>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 14px;font-weight:800;font-size:14px}
+.pn>summary::-webkit-details-marker{display:none}
+.pn>summary small{font-weight:600;color:var(--mut);margin-left:auto}
+.pk{padding:0 12px 12px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.pk input[type=search]{flex:1;min-width:140px;height:36px;border-radius:18px;border:0;padding:0 14px;background:#fff;color:#111;font-size:14px}
+.bt{background:#1d5b43;border:0;border-radius:18px;height:32px;padding:0 12px;font-weight:700;font-size:12px;cursor:pointer}
+.bt.on{background:var(--gold);color:#1a1a1a}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow:auto;padding:2px}
+.ch{border:1px solid var(--line);background:var(--card2);border-radius:16px;padding:5px 10px;font-size:13px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.ch small{color:var(--mut)}
+.ch.on{background:var(--green);border-color:transparent;color:#052016;font-weight:700}
+.ch.on small{color:rgba(5,32,22,.75)}
+
+.rk{display:flex;gap:8px;overflow:auto;padding:2px 2px 10px;margin-bottom:2px}
+.rc{flex:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:7.5em}
+.rc b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:9em}
+.rc span{font-size:22px;font-weight:800;line-height:1.15}
+.rc small{display:block;color:var(--mut);font-size:11px}
+.rc.top{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.rc.top span{color:var(--gold)}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 8px;font-size:12.5px;color:var(--mut)}
+.tools label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.tools select{background:var(--card2);border:1px solid var(--line);border-radius:10px;height:30px;padding:0 8px}
+.sum{margin-left:auto;font-weight:700;color:var(--text)}
+
+.tw{overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);-webkit-overflow-scrolling:touch}
+table.tb{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:13px}
+.tb th,.tb td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:center;vertical-align:middle}
+.tb th:last-child,.tb td:last-child{border-right:0}
+.tb thead th{position:sticky;top:0;z-index:3;background:#0c2217;padding:8px 4px 7px;min-width:5.2em;max-width:6.4em;vertical-align:top}
+.tb thead th.mt{z-index:5}
+.tb .mt{position:sticky;left:0;z-index:2;background:#0c2217;text-align:left;min-width:11.2em;max-width:12em;padding:7px 9px;border-right:2px solid var(--line)}
+.mt i{font-style:normal;font-weight:800;color:var(--gold);margin-right:6px;font-size:12px}
+.mt small{color:var(--mut);font-size:11px;display:block}
+.mt b{font-size:12.5px;line-height:1.2;display:block}
+.mt .fin{display:inline-block;margin-top:3px;font-style:normal;font-size:11px;font-weight:800;padding:1px 7px;border-radius:9px;background:var(--card2)}
+.mt .fin.no{opacity:.45;font-weight:600}
+.cell{height:100%;min-height:46px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.w{background:rgba(31,182,115,.28);color:#7dffbf}
+.l{background:rgba(229,72,77,.2);color:#ff9a9d}
+.n{color:var(--text)}
+.dif{box-shadow:inset 0 0 0 2px rgba(255,212,0,.55)}
+.th{display:flex;flex-direction:column;align-items:center;gap:3px}
+.th .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff}
+.th b{font-size:11.5px;line-height:1.15;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.th small{color:var(--mut);font-size:10.5px}
+.th button{background:none;border:0;color:var(--mut);font-size:13px;cursor:pointer;padding:0 4px;line-height:1}
+.tb thead th.best{background:#2a3a10}
+.sm td{background:#0a1b13}
+.sm .mt{background:#0a1b13;font-weight:800;font-size:12.5px}
+.sm .cell{min-height:40px;flex-direction:column;font-size:13px;line-height:1.2}
+.sm .cell small{font-size:10.5px;font-weight:600;color:var(--mut)}
+.hit{background:rgba(255,212,0,.22);color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)}
+.hit small{color:var(--gold)}
+.pt .cell{font-size:18px}
+.pt .best{background:rgba(255,212,0,.22);color:var(--gold)}
+.jj{display:inline-block;background:var(--gold);color:#222;border-radius:50%;width:20px;height:20px;line-height:20px;font-size:12px;font-weight:900}
+.mut{opacity:.35}
+#msg{padding:34px 16px;text-align:center;opacity:.85;line-height:1.5}
+.leg{font-size:11.5px;color:var(--mut);margin-top:10px;line-height:1.7}
+.leg span{display:inline-block;margin-right:12px}
+.leg .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="index.html" aria-label="Torna alla classifica">←</a>
+  <h1>⚖️ Confronto pronostici</h1>
+  <select id="tsel" aria-label="Scegli il concorso" style="display:none"></select>
+</header>
+<div id="st">Carico i dati…</div>
+<main id="app"></main>
+
+<script>
+/* ==================== CONFIGURAZIONE (stessi valori di index.html) ==================== */
+const CONFIG = {
+  BASE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6XtbY4S0WB59_Cxe0vByMR91d-XXZ4cx6HGMBUa6hqlomWmEh55xcza0LOhECKMRQ8RElSGCSUUB/pub",
+  WEBAPP: "https://script.google.com/macros/s/AKfycbyV5pZM-EMC2jBLHJu3w5ZI9QuZdNIXdKfE_7bQe9PI1QBrpgrYuIF-H4eivgB7MSyC/exec",
+  CONCORSO: { row: 2, col: "C" },     /* numero del concorso (C2 del tabulato) */
+  EXACT: { row: 26, col: "D" },        /* risultati esatti delle 14 partite: D26:Q26 */
+  TABMODE: { row: 60, col: "C" },     /* visibilità del tabulato (come in index.html): vuoto/auto, mostra, nascondi */
+  PRON: { row: 60, col: "G" },        /* G60: «chiusi» = pronostici chiusi */
+  SKIP: /final|interm|premi|vincit|\bins\b/i,   /* fogli che non sono tabulati */
+  REFRESH: 60                          /* secondi tra un aggiornamento e l'altro */
+};
+const colIdx = L => String(L).toUpperCase().split("").reduce((a,c)=>a*26+c.charCodeAt(0)-64, 0) - 1;
+
+/* ==================== UTILITÀ ==================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"");
+const t = v => v==null ? "" : String(v).trim();
+const toNum = v => { const s=t(v).replace(',', '.'); if(!/^-?\d+(\.\d+)?$/.test(s)) return null; return parseFloat(s); };
+const is1x2 = v => /^[1Xx2]$/.test(t(v));
+const nrm = x => String(x).toLowerCase().replace(/\s+/g,"");
+const isScore = x => /^\d+\s*[-–—−:\/]\s*\d+$/.test(t(x));
+const sc2 = x => t(x).replace(/\s+/g,"").replace(/[–—−:\/]/g,"-").toUpperCase();
+const isAltro = x => /^altro$/i.test(t(x));
+const isOut = x => isScore(x) || isAltro(x);
+const showOut = x => isAltro(x) ? "ALTRO" : t(x).replace(/\s+/g,"").replace(/[–—−:\/]/g,"-");
+const hue = s => { let h=0; for(const c of String(s)) h=(h*31+c.charCodeAt(0))%360; return h; };
+const ab = s => s.replace(/\s+/g,"").slice(0,3).toUpperCase();
+function esitoFromScore(x){
+  const m = t(x).match(/^(\d+)\s*[-–—−:\/]\s*(\d+)$/); if(!m) return "";
+  return +m[1]>+m[2] ? "1" : (+m[1]<+m[2] ? "2" : "X");
+}
+function splitMatch(label){
+  const m = label.match(/^([A-Za-zÀ-ú]{2,4})\s+(\d{1,2}[:.]\d{2})\s+(.+)$/);
+  const when = m ? m[1]+" "+m[2] : "", teams = m ? m[3] : label;
+  const tt = teams.split(/\s+-\s+/);
+  return {when, teams, ta:tt[0]||"", tb:tt[1]||"", a:ab(tt[0]||""), b:ab(tt[1]||"")};
+}
+
+/* ==================== RETE E LETTURA DEL FOGLIO ==================== */
+function parseCSV(txt){
+  const out=[]; let r=[], f="", q=false;
+  for(let i=0;i<txt.length;i++){ const c=txt[i];
+    if(q){ if(c=='"'){ if(txt[i+1]=='"'){f+='"';i++} else q=false } else f+=c }
+    else if(c=='"') q=true;
+    else if(c==','){ r.push(f); f="" }
+    else if(c=='\n'){ r.push(f); out.push(r); r=[]; f="" }
+    else if(c!='\r') f+=c;
+  }
+  if(f!==""||r.length){ r.push(f); out.push(r) }
+  return out;
+}
+const PROXIES = [u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u), u=>"https://corsproxy.io/?"+encodeURIComponent(u)];
+async function getText(url){
+  let last = "";
+  for(const u of [url, ...PROXIES.map(f=>f(url))]){
+    try{
+      const r = await fetch(u, {cache:"no-store"});
+      if(!r.ok){ last = "HTTP "+r.status; continue; }
+      const tx = await r.text();
+      if(tx && tx.length>20) return tx;
+      last = "risposta vuota";
+    }catch(e){ last = e.message; }
+  }
+  throw new Error(last || "rete non raggiungibile");
+}
+const csv = async gid => parseCSV(await getText(CONFIG.BASE+"?gid="+gid+"&single=true&output=csv&t="+Date.now()));
+async function discover(){
+  const h = await getText(CONFIG.BASE.replace(/\/pub$/,"/pubhtml")+"?t="+Date.now());
+  const out = [], seen = new Set();
+  const add = (gid,name)=>{ if(!seen.has(gid)){ seen.add(gid); out.push({gid, name:name||("gid "+gid)}); } };
+  let m;
+  const re1 = /sheet-button-(\d+)[^>]*>\s*(?:<a[^>]*>)?\s*([^<]+?)\s*</g;
+  while((m=re1.exec(h))) add(m[1], m[2]);
+  const re2 = /name:\s*"((?:[^"\\]|\\.)*)"[^{}]*?gid:\s*"(\d+)"/g;
+  while((m=re2.exec(h))) add(m[2], m[1].replace(/\\u([\da-f]{4})/gi,(_,x)=>String.fromCharCode(parseInt(x,16))));
+  const re3 = /[?&;#]gid=(\d+)/g;
+  while((m=re3.exec(h))) add(m[1], "");
+  if(!out.length) throw new Error("nessun foglio nel codice pubblicato");
+  return out;
+}
+
+/* legge un tabulato («C12 tab»): partite, esiti, risultati esatti, partecipanti con pronostici, esatto, jolly, punti */
+function parseTab(rows){
+  const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
+  let empty = false;
+  if(!mr.length){
+    rows.forEach((r,i)=>{ if(i>=1 && /\S\s*-\s*\S/.test(t(r[1]))) mr.push(i); });
+    let run = [];
+    for(let k=0;k<mr.length;k++){
+      if(run.length && mr[k]!==run[run.length-1]+1){ if(run.length>=8) break; run = []; }
+      run.push(mr[k]);
+    }
+    if(run.length<8) return null;
+    mr.length = 0; run.forEach(i=>mr.push(i));
+    empty = true;
+  }
+  const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
+  const first = blk[0], last = blk[blk.length-1];
+  let nameRow=null, best=-1;
+  for(let i=Math.max(0,first-4); i<first; i++){
+    const n = rows[i].filter(c=>t(c) && !/^\d+$/.test(t(c))).length;
+    if(n>best){ best=n; nameRow=rows[i]; }
+  }
+  if(empty && !nameRow) nameRow = [];
+  if(!nameRow || (!empty && best<3)) return null;
+  let labelCol=0, len=-1;
+  rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
+  let start = labelCol+1, resultCol = -1;
+  const hc = t(nameRow[start]);
+  const isConc = x => /^(c|conc\.?|concorso)?\s*\d+$/i.test(x);
+  if(hc==="" || isConc(hc) || /^[-–]$/.test(hc)){ resultCol=start; start++; }
+  const concRaw = t((rows[CONFIG.CONCORSO.row-1]||[])[colIdx(CONFIG.CONCORSO.col)]) || (isConc(hc) ? hc : "");
+  const concNum = (concRaw.match(/\d+/)||[""])[0];
+  const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
+  if(!empty && cols.length<3) return null;
+  const partite = blk.map(i=>{
+    let ris = resultCol>=0 ? t(rows[i][resultCol]) : "";
+    if(/^[-–]?$/.test(ris)) ris = "";
+    let esito = "";
+    if(is1x2(ris)) esito = ris.toUpperCase(); else esito = esitoFromScore(ris);
+    return {label:t(rows[i][labelCol]), ris, esito};
+  });
+  const exRow = rows[CONFIG.EXACT.row-1] || [], ec0 = colIdx(CONFIG.EXACT.col);
+  partite.forEach((m,k)=>{ m.ex = t(exRow[ec0+k]); });
+  const after = rows.slice(last+1);
+  const lab = r => r.slice(0,start).map(t).join(" ").toLowerCase();
+  const find = (re,not) => after.findIndex(r=>{ const l=lab(r); return re.test(l) && !(not && not.test(l)); });
+  const iB=find(/bonus/), iJ=find(/jolly/,/punti/), iT=find(/totale/), iE=find(/risultato esatto/,/punti|bonus/), iPE=find(/punti.*risultato esatto/);
+  const iS = (iB>0 && !/[a-zà-ú]/i.test(lab(after[iB-1]))) ? iB-1 : -1;
+  const part = cols.map(c=>({
+    nome: t(nameRow[c]),
+    preds: blk.map(i=>t(rows[i][c]).toUpperCase()),
+    scelta: iS>=0 ? t(after[iS][c]) : "",
+    bonus:  iB>=0 ? t(after[iB][c]) : "",
+    jolly:  iJ>=0 && /^s[iì]/i.test(t(after[iJ][c])) ? "SI" : "NO",
+    esatto: iE>=0 ? t(after[iE][c]) : "",
+    pEsatto: iPE>=0 ? (toNum(after[iPE][c])??0) : 0,
+    tot:    iT>=0 ? (toNum(after[iT][c])??0) : 0
+  }));
+  const mraw = t((rows[CONFIG.TABMODE.row-1]||[])[colIdx(CONFIG.TABMODE.col)]).toLowerCase();
+  const mode = /^(mostra|sempre|visibile|s[iì]|show)/.test(mraw) ? "show" : (/^(nascondi|nascosto|no|hide)/.test(mraw) ? "hide" : "auto");
+  const pronClosed = /^(chius|closed)/.test(t((rows[CONFIG.PRON.row-1]||[])[colIdx(CONFIG.PRON.col)]).toLowerCase());
+  return {partite, part, concNum, mode, pronClosed};
+}
+/* come in index.html: il concorso in corso si vede solo in modalità «mostra», oppure in automatico a pronostici chiusi */
+const tabVisible = d => d.mode==="show" || (d.mode==="auto" && d.pronClosed);
+
+/* ==================== CALCOLI ==================== */
+function buildM(d){
+  const M = d.partite.map(m=>({...m, ...splitMatch(m.label), out: isOut(m.ex) ? showOut(m.ex) : (isOut(m.ris) ? showOut(m.ris) : "")}));
+  const votes = M.map(()=>new Set());
+  d.part.forEach(p=>{
+    if(!p.scelta || !isOut(p.esatto)) return;
+    const k = M.findIndex(m=>nrm(m.label).includes(nrm(p.scelta)));
+    if(k>=0) votes[k].add(sc2(p.esatto));
+  });
+  M.forEach((m,k)=>{ if(!m.out && votes[k].size===1) m.out = [...votes[k]][0]; });
+  M.forEach(m=>{
+    if(m.out && isAltro(m.out) && !m.esito) m.out = "";      /* «ALTRO» da solo non prova che la partita sia finita */
+    if(m.out && !m.esito) m.esito = esitoFromScore(m.out);
+  });
+  return M;
+}
+/* risultato esatto indovinato: punteggio uguale, oppure segnato dal foglio, oppure punti assegnati */
+function exactOf(p, M){
+  const k = p.scelta ? M.findIndex(m=>nrm(m.label).includes(nrm(p.scelta))) : -1;
+  const calc = k>=0 && !!M[k].out && isOut(p.bonus) && sc2(M[k].out)===sc2(p.bonus);
+  const ex = t(p.esatto);
+  const flag = /^(s[iì]|ok|✓|✔|✅|vero|true|esatto|corretto|giusto)$/i.test(ex) || (isOut(ex) && isOut(p.bonus) && sc2(ex)===sc2(p.bonus));
+  return {hit: calc || flag || (+p.pEsatto||0)>0, k};
+}
+function stats(d, M){
+  const sorted = d.part.map(p=>p.tot).sort((a,b)=>b-a);
+  return d.part.map((p,i)=>{
+    let hits=0, played=0;
+    M.forEach((m,k)=>{ if(m.esito){ played++; if(p.preds[k]===m.esito) hits++; } });
+    const ex = exactOf(p, M);
+    const pos = sorted.indexOf(p.tot)+1;
+    return {i, p, hits, played, ex, pos, pts:p.tot};
+  });
+}
+
+/* ==================== STATO ==================== */
+const ST = {tabs:[], sel:null, selected:new Set(), q:"", onlyDiff:false, sortBy:"pts", err:"", time:"", loading:true};
+const SELKEY = "toto_cmp_sel", UIKEY = "toto_cmp_ui";
+try{ const s = JSON.parse(localStorage.getItem(SELKEY)||"[]"); if(Array.isArray(s)) s.forEach(x=>ST.selected.add(x)); ST.userPicked = ST.selected.size>0; }catch(e){}
+try{ const u = JSON.parse(localStorage.getItem(UIKEY)||"{}"); if(u.sortBy) ST.sortBy=u.sortBy; if(u.onlyDiff) ST.onlyDiff=true; }catch(e){}
+const saveSel = () => { try{ localStorage.setItem(SELKEY, JSON.stringify([...ST.selected])); localStorage.setItem(UIKEY, JSON.stringify({sortBy:ST.sortBy, onlyDiff:ST.onlyDiff})); }catch(e){} };
+const curTab = () => ST.tabs.find(x=>x.id===ST.sel);
+
+/* ==================== CARICAMENTO ==================== */
+async function loadAll(){
+  try{
+    const found = [];
+    /* 1) archivio dello script: vede anche i concorsi nascosti (letti solo quando li scegli) */
+    try{
+      const wu = CONFIG.WEBAPP;
+      if(wu){
+        const j = JSON.parse(await getText(wu+(wu.includes("?")?"&":"?")+"action=archive&t="+Date.now()));
+        if(j.ok && Array.isArray(j.list)) j.list.forEach(x=>{
+          const n = +((String(x.conc).match(/\d+/)||[""])[0])||0;
+          found.push({id:"s:"+x.name, label:n?"Concorso "+n:x.name, num:n, data:null, archive:x.name});
+        });
+      }
+    }catch(e){}
+    /* 2) fogli pubblicati */
+    const sheets = await discover();
+    for(const sh of sheets){
+      if(CONFIG.SKIP.test(sh.name)) continue;
+      try{
+        const d = parseTab(await csv(sh.gid));
+        if(!d) continue;
+        const n = +d.concNum || +(String(sh.name).match(/\d+/)||[0])[0] || 0;
+        const k = found.findIndex(x=>n && x.num===n);
+        const item = {id:"g:"+sh.gid, label:n?"Concorso "+n:sh.name, num:n, data:d};
+        if(k>=0) found[k] = item; else found.push(item);
+      }catch(e){}
+    }
+    found.sort((a,b)=>b.num-a.num || a.label.localeCompare(b.label,"it"));
+    if(!found.length) throw new Error("nessun tabulato trovato nel foglio pubblicato");
+    /* se un concorso era già caricato conservo i suoi dati letti dall'archivio */
+    found.forEach(x=>{ const o = ST.tabs.find(y=>y.id===x.id); if(o && !x.data && o.data) x.data = o.data; });
+    ST.tabs = found;
+    if(!ST.sel || !found.some(x=>x.id===ST.sel)) ST.sel = (found.find(x=>x.data)||found[0]).id;
+    ST.err = "";
+    ST.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){ ST.err = e.message; }
+  ST.loading = false;
+  await ensureData();
+  const c0 = curTab(); if(c0 && c0.data) c0.sig = JSON.stringify(c0.data);
+  fillSelect(); render();
+}
+async function ensureData(){
+  const c = curTab(); if(!c || c.data || !c.archive) return;
+  try{
+    const wu = CONFIG.WEBAPP;
+    const j = JSON.parse(await getText(wu+(wu.includes("?")?"&":"?")+"action=archive&name="+encodeURIComponent(c.archive)+"&t="+Date.now()));
+    if(!j.ok) throw new Error(j.error||"errore");
+    const d = parseTab(j.rows); if(!d) throw new Error("formato non riconosciuto");
+    c.data = d; ST.err = "";
+  }catch(e){ ST.err = "non riesco a leggere "+c.label+": "+e.message; }
+}
+function fillSelect(){
+  const s = $("tsel");
+  if(ST.tabs.length<2){ s.style.display="none"; return; }
+  s.style.display = "";
+  s.innerHTML = ST.tabs.map((x,i)=>`<option value="${esc(x.id)}"${x.id===ST.sel?" selected":""}>${esc(x.label)}${i===0?" · ultimo":""}</option>`).join("");
+}
+$("tsel").addEventListener("change", async e=>{
+  ST.sel = e.target.value; ST.loading = true; render();
+  await ensureData(); ST.loading = false; render();
+});
+
+/* ==================== INTERFACCIA ==================== */
+function toggleP(i){
+  const d = curTab().data, k = norm(d.part[i].nome);
+  if(ST.selected.has(k)) ST.selected.delete(k); else ST.selected.add(k);
+  ST.userPicked = true; saveSel(); render(true);
+}
+function setSel(mode){
+  const d = curTab().data, s = stats(d, buildM(d));
+  if(mode==="none") ST.selected.clear();
+  else if(mode==="all") s.forEach(x=>ST.selected.add(norm(x.p.nome)));
+  else { ST.selected.clear(); s.slice().sort((a,b)=>b.pts-a.pts || a.p.nome.localeCompare(b.p.nome,"it")).slice(0,+mode).forEach(x=>ST.selected.add(norm(x.p.nome))); }
+  ST.userPicked = true; saveSel(); render(true);
+}
+function onSearch(v){ ST.q = v; renderChips(); }
+function setSort(v){ ST.sortBy = v; saveSel(); render(true); }
+function setDiff(v){ ST.onlyDiff = !!v; saveSel(); render(true); }
+
+function chipHtml(s){
+  const on = ST.selected.has(norm(s.p.nome));
+  return `<button class="ch${on?" on":""}" onclick="toggleP(${s.i})" aria-pressed="${on}">${esc(s.p.nome)}<small>${s.pts}</small></button>`;
+}
+function renderChips(){
+  const c = curTab(); if(!c || !c.data) return;
+  const q = norm(ST.q), s = stats(c.data, buildM(c.data));
+  const list = s.slice().sort((a,b)=>b.pts-a.pts || a.p.nome.localeCompare(b.p.nome,"it")).filter(x=>!q || norm(x.p.nome).includes(q));
+  $("chips").innerHTML = list.map(chipHtml).join("") || '<span style="opacity:.6;font-size:13px">Nessun partecipante con questo nome</span>';
+}
+
+function render(keepPanel){
+  const app = $("app"), c = curTab();
+  $("st").textContent = ST.loading ? "Carico i dati…" : (ST.err ? "⚠️ "+ST.err : "🟢 dal foglio, ore "+ST.time);
+  if(!c || !c.data){
+    app.innerHTML = '<div id="msg">'+(ST.loading ? "⏳ Carico i tabulati…" : "⚠️ Non riesco a leggere i dati."+(ST.err?"<br><small>"+esc(ST.err)+"</small>":"")+'<br><button class="bt" style="margin-top:12px" onclick="location.reload()">Riprova</button>')+'</div>';
+    return;
+  }
+  if(c.id===ST.tabs[0].id && !tabVisible(c.data)){
+    app.innerHTML = '<div id="msg">🔒 <b>Pronostici ancora riservati</b><br>Il confronto del '+esc(c.label.toLowerCase())+' sarà disponibile quando i pronostici saranno chiusi.'+(ST.tabs.length>1?'<br><small>Intanto puoi scegliere un concorso precedente dal menu in alto.</small>':'')+'</div>';
+    return;
+  }
+  const d = c.data, M = buildM(d), all = stats(d, M);
+  if(!d.part.length){ app.innerHTML = '<div id="msg">Nessun partecipante in questo concorso.<br><small>Quando consegnano i pronostici compariranno qui.</small></div>'; return; }
+  /* primo avvio senza scelte salvate: propongo i primi 3 della classifica del concorso */
+  if(!ST.userPicked && !all.some(x=>ST.selected.has(norm(x.p.nome)))){
+    all.slice().sort((a,b)=>b.pts-a.pts || a.p.nome.localeCompare(b.p.nome,"it")).slice(0,3).forEach(x=>ST.selected.add(norm(x.p.nome)));
+  }
+  let sel = all.filter(x=>ST.selected.has(norm(x.p.nome)));
+  if(ST.sortBy==="pts") sel.sort((a,b)=>b.pts-a.pts || a.p.nome.localeCompare(b.p.nome,"it"));
+  else if(ST.sortBy==="hits") sel.sort((a,b)=>b.hits-a.hits || b.pts-a.pts);
+  else sel.sort((a,b)=>a.p.nome.localeCompare(b.p.nome,"it",{sensitivity:"base"}));
+  const open = keepPanel===true ? (document.getElementById("pn") ? document.getElementById("pn").open : false) : sel.length<2;
+  const maxPts = Math.max(...sel.map(x=>x.pts), 0), maxHits = Math.max(...sel.map(x=>x.hits), 0);
+
+  let h = `<details class="pn" id="pn"${open?" open":""}><summary>👥 Scegli i partecipanti <small>${sel.length} selezionat${sel.length===1?"o":"i"} su ${all.length}</small></summary><div class="pk">
+    <div class="row"><input type="search" id="qs" placeholder="Cerca un partecipante…" value="${esc(ST.q)}" oninput="onSearch(this.value)" aria-label="Cerca un partecipante">
+    <button class="bt" onclick="setSel('3')">Primi 3</button><button class="bt" onclick="setSel('5')">Primi 5</button><button class="bt" onclick="setSel('all')">Tutti</button><button class="bt" onclick="setSel('none')">Nessuno</button></div>
+    <div class="chips" id="chips"></div></div></details>`;
+
+  if(!sel.length){
+    app.innerHTML = h + '<div id="msg">Scegli almeno un partecipante per vedere i pronostici.</div>';
+    $("pn").open = true; renderChips(); return;
+  }
+
+  /* classifica tra i selezionati */
+  const byPts = sel.slice().sort((a,b)=>b.pts-a.pts || a.p.nome.localeCompare(b.p.nome,"it"));
+  h += '<div class="rk">' + byPts.map(x=>`<div class="rc${x.pts===maxPts && maxPts>0 ? " top":""}"><b>${esc(x.p.nome)}</b><span>${x.pts}</span><small>${x.hits}/${x.played||M.length} esiti${x.ex.hit?" · 🎯":""}${x.p.jolly==="SI"?" · J":""}</small></div>`).join("") + '</div>';
+
+  /* partite in cui i selezionati concordano / differiscono */
+  const same = M.map((m,k)=> sel.every(x=>x.p.preds[k]===sel[0].p.preds[k]));
+  const nSame = same.filter(Boolean).length;
+  h += `<div class="tools"><label><input type="checkbox" ${ST.onlyDiff?"checked":""} onchange="setDiff(this.checked)"> Solo le partite dove differiscono</label>
+    <label>Ordina per <select onchange="setSort(this.value)"><option value="pts"${ST.sortBy==="pts"?" selected":""}>punti</option><option value="hits"${ST.sortBy==="hits"?" selected":""}>esiti azzeccati</option><option value="name"${ST.sortBy==="name"?" selected":""}>nome</option></select></label>
+    ${sel.length>1 ? `<span class="sum">${nSame} uguali · ${M.length-nSame} diverse</span>` : ""}</div>`;
+
+  /* matrice */
+  h += '<div class="tw"><table class="tb"><thead><tr><th class="mt">Partita</th>' +
+    sel.map(x=>`<th class="${x.pts===maxPts && maxPts>0 ? "best":""}"><div class="th"><span class="av" style="background:hsl(${hue(x.p.nome)},55%,38%)">${esc(((x.p.nome.match(/[A-Za-zÀ-ú0-9]/)||["?"])[0]).toUpperCase())}</span><b title="${esc(x.p.nome)}">${esc(x.p.nome)}</b><small>${x.pos}° · ${x.pts} pt</small><button onclick="toggleP(${x.i})" aria-label="Togli ${esc(x.p.nome)}">✕</button></div></th>`).join("") +
+    '</tr></thead><tbody>';
+  M.forEach((m,k)=>{
+    if(ST.onlyDiff && sel.length>1 && same[k]) return;
+    const fin = m.esito ? (m.out ? m.esito+" · "+esc(m.out) : m.esito) : "da giocare";
+    h += `<tr><td class="mt"><i>${k+1}</i>${m.when?`<small style="display:inline">${esc(m.when)}</small>`:""}<b>${esc(m.teams)}</b><em class="fin${m.esito?"":" no"}">${fin}</em></td>`;
+    sel.forEach(x=>{
+      const v = x.p.preds[k] || "";
+      const cls = m.esito && v ? (v===m.esito ? "w" : "l") : "n";
+      h += `<td><div class="cell ${cls}${sel.length>1 && !same[k] ? " dif":""}">${esc(v||"–")}</div></td>`;
+    });
+    h += '</tr>';
+  });
+  /* righe di riepilogo */
+  const played = M.filter(m=>m.esito).length;
+  h += `<tr class="sm"><td class="mt">✅ Esiti azzeccati</td>${sel.map(x=>`<td><div class="cell ${x.hits===maxHits && maxHits>0 ? "w":""}">${x.hits}<small>su ${played}</small></div></td>`).join("")}</tr>`;
+  h += `<tr class="sm"><td class="mt">🎯 Risultato esatto<small style="font-weight:600">scelto · uscito</small></td>` + sel.map(x=>{
+    const sc = x.p.scelta ? splitMatch(x.p.scelta) : null, mm = x.ex.k>=0 ? M[x.ex.k] : null;
+    const label = sc ? sc.a+"–"+sc.b : "";
+    const out = mm && mm.out ? showOut(mm.out) : "";
+    if(!x.p.bonus && !sc) return '<td><div class="cell"><span class="mut">–</span></div></td>';
+    return `<td><div class="cell${x.ex.hit?" hit":""}">${esc(x.p.bonus||"–")}<small>${label ? esc(label) : ""}${out ? " · "+esc(out) : (label?" · …":"")}</small></div></td>`;
+  }).join("") + '</tr>';
+  h += `<tr class="sm"><td class="mt">🃏 Jolly</td>${sel.map(x=>`<td><div class="cell">${x.p.jolly==="SI"?'<span class="jj">J</span>':'<span class="mut">–</span>'}</div></td>`).join("")}</tr>`;
+  h += `<tr class="sm pt"><td class="mt">⭐ Punti del concorso</td>${sel.map(x=>`<td><div class="cell ${x.pts===maxPts && maxPts>0 ? "best":""}">${x.pts}</div></td>`).join("")}</tr>`;
+  h += '</tbody></table></div>';
+  h += `<div class="leg"><span><i class="sw" style="background:rgba(31,182,115,.5)"></i>esito azzeccato</span><span><i class="sw" style="background:rgba(229,72,77,.4)"></i>sbagliato</span><span><i class="sw" style="background:transparent;box-shadow:inset 0 0 0 2px rgba(255,212,0,.8)"></i>i partecipanti scelti non concordano</span><span><i class="sw" style="background:rgba(255,212,0,.45)"></i>risultato esatto centrato / miglior punteggio</span><span><span class="jj" style="width:14px;height:14px;line-height:14px;font-size:9px">J</span> jolly giocato</span></div>`;
+  app.innerHTML = h;
+  renderChips();
+}
+
+/* ==================== AVVIO ==================== */
+loadAll();
+/* aggiornamento automatico: rilegge solo il concorso aperto e ridisegna solo se qualcosa è cambiato */
+async function refresh(){
+  const c = curTab();
+  if(document.hidden || ST.loading || !c || !/^g:/.test(c.id)) return;
+  if(document.activeElement && document.activeElement.id==="qs") return;
+  try{
+    const d = parseTab(await csv(c.id.slice(2)));
+    if(!d) return;
+    const sig = JSON.stringify(d);
+    ST.time = new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); ST.err = "";
+    if(sig !== c.sig){ c.sig = sig; c.data = d; render(true); } else $("st").textContent = "🟢 dal foglio, ore "+ST.time;
+  }catch(e){}
+}
+setInterval(refresh, CONFIG.REFRESH*1000);
+</script>
+</body>
+</html>
