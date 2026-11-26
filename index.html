@@ -543,7 +543,19 @@ function normLink(x){
 }
 function parseTab(rows){
   const mr = []; rows.forEach((r,i)=>{ if(r.filter(is1x2).length>=8) mr.push(i); });
-  if(!mr.length) return null;
+  let empty = false;   /* true = foglio senza nessun partecipante (es. «C12 tab» appena creato) */
+  if(!mr.length){
+    /* nessun pronostico: riconosco le partite dalle squadre in B3:B16 («Squadra - Squadra»), almeno 8 righe di fila */
+    rows.forEach((r,i)=>{ if(i>=1 && /\S\s*-\s*\S/.test(t(r[1]))) mr.push(i); });
+    let run = [];
+    for(let k=0;k<mr.length;k++){
+      if(run.length && mr[k]!==run[run.length-1]+1){ if(run.length>=8) break; run = []; }
+      run.push(mr[k]);
+    }
+    if(run.length<8) return null;
+    mr.length = 0; run.forEach(i=>mr.push(i));
+    empty = true;
+  }
   const blk = [mr[0]]; for(let k=1;k<mr.length && mr[k]===blk[k-1]+1;k++) blk.push(mr[k]);
   const first = blk[0], last = blk[blk.length-1];
   let nameRow=null, best=-1;
@@ -551,7 +563,8 @@ function parseTab(rows){
     const n = rows[i].filter(c=>t(c) && !/^\d+$/.test(t(c))).length;
     if(n>best){ best=n; nameRow=rows[i]; }
   }
-  if(!nameRow || best<3) return null;
+  if(empty && !nameRow) nameRow = [];
+  if(!nameRow || (!empty && best<3)) return null;
   let labelCol=0, len=-1;
   rows[first].forEach((c,i)=>{ if(!is1x2(c) && !/^[-–]?$/.test(t(c)) && t(c).length>len){ len=t(c).length; labelCol=i; } });
   let start = labelCol+1, resultCol = -1;
@@ -563,7 +576,7 @@ function parseTab(rows){
   const concNum = (concRaw.match(/\d+/)||[""])[0];
   const dataConc = t((rows[CONFIG.DATA.row-1]||[])[colIdx(CONFIG.DATA.col)]);
   const cols = []; for(let c=start;c<nameRow.length;c++) if(t(nameRow[c])) cols.push(c);
-  if(cols.length<3) return null;
+  if(!empty && cols.length<3) return null;
   const partite = blk.map(i=>{
     let ris = resultCol>=0 ? t(rows[i][resultCol]) : "";
     const raw = ris;
@@ -920,7 +933,7 @@ async function scanTabs(){
       if(cache[sh.gid]){ const d0 = cache[sh.gid].data; list.push({gid:sh.gid, name:sh.name, num:+d0.concNum||0, label:d0.concNum ? "Concorso "+d0.concNum : sh.name, cur:false}); continue; }
       try{
         const d = parseTab(await csv(sh.gid));
-        if(d && d.part.length>=3){ cache[sh.gid] = {data:d}; list.push({gid:sh.gid, name:sh.name, num:+d.concNum||0, label:d.concNum ? "Concorso "+d.concNum : sh.name, cur:false}); }
+        if(d && (d.part.length>=3 || d.partite.length>=8)){ cache[sh.gid] = {data:d}; list.push({gid:sh.gid, name:sh.name, num:+d.concNum||0, label:d.concNum ? "Concorso "+d.concNum : sh.name, cur:false}); }
         else S.skip[sh.gid] = Date.now();
       }catch(e){}
     }
