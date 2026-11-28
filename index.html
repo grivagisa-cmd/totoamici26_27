@@ -277,7 +277,6 @@ details.gr.win .ch span{background:rgba(255,212,0,.25);font-weight:700}
     <button class="di" id="dRis"><span>⚽</span>Inserisci risultati</button>
     <div class="dsep">App</div>
     <button class="di" id="dFull"><span>⛶</span>Schermo intero</button>
-    <button class="di" id="dDbg"><span>🛠</span>Diagnostica</button>
     <div id="inst"><span id="inst_t">📲 Aggiungi la pagina alla schermata Home</span><button class="ib full" id="inst_b">Installa</button><button class="ib" id="inst_x">✕</button></div>
     <div id="dAdmin" style="display:none">
       <div class="dsep">Admin</div>
@@ -708,8 +707,7 @@ async function loadAllInner(){
       if(Object.values(S.map).includes(sh.gid)) continue;
       if(S.skip[sh.gid] && Date.now()-S.skip[sh.gid] < 30*60000) continue;     /* foglio già visto e non utile: lo ricontrollo ogni 30 minuti */
       try{
-        const rw = await csv(sh.gid), c = classify(rw);
-        (S.dbgSheets = S.dbgSheets || {})[sh.gid] = sh.name+" → "+(c ? c[0]+(c[0]==="tabulato" ? " (concorso "+(c[1].concNum||"?")+", "+c[1].partite.length+" partite, "+c[1].part.length+" partecipanti)" : "") : "NON riconosciuto ("+rw.length+" righe)");
+        const c = classify(await csv(sh.gid));
         if(c) (cand[c[0]] = cand[c[0]] || []).push({gid:sh.gid, name:sh.name, data:c[1]}); else S.skip[sh.gid] = Date.now();
       }catch(e){ S.lastErr = "gid "+sh.gid+": "+e.message; }
     }
@@ -740,26 +738,6 @@ async function loadAllInner(){
   if(changed) saveCache();
   const first = !S.ready; S.ready = true;
   if(changed || first) render(); else refreshInfo();
-  dbgPanel();
-}
-/* pannello di diagnostica: da menu («Diagnostica»), oppure con ?debug / #debug nell'indirizzo */
-function dbgOn(){ try{ return localStorage.getItem("toto_dbg")==="1" || /debug/.test(location.search+location.hash); }catch(e){ return /debug/.test(location.search+location.hash); } }
-function dbgPanel(){
-  let b = document.getElementById("dbgp");
-  if(!dbgOn()){ if(b) b.remove(); return; }
-  if(!b){
-    b = document.createElement("div"); b.id = "dbgp";
-    b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99;max-height:45%;overflow:auto;background:#000e;color:#9f9;font:11px/1.45 monospace;padding:8px 10px 8px;white-space:pre-wrap";
-    document.body.appendChild(b);
-  }
-  const ti = S.tabulato && S.tabulato.data && S.tabulato.data.part ? tabInfo() : null;
-  const td = S.tabulato && S.tabulato.data;
-  b.textContent = "DIAGNOSTICA (tocca il menu → Diagnostica per chiuderla)\nfogli letti:\n" + (Object.values(S.dbgSheets||{}).join("\n") || "(nessuno letto in questa sessione: i fogli vengono riletti ogni 30 minuti)") +
-    "\ntabulato in uso: " + (S.map && S.map.tabulato ? "gid "+S.map.tabulato : "nessuno") +
-    (td && td.partite ? " · concorso "+(td.concNum||"?")+" · "+td.partite.length+" partite · "+td.part.length+" partecipanti" : "") +
-    (ti ? "\nmodalità: "+ti.mode+" · pronostici chiusi: "+pronClosed()+" · tabulato visibile: "+ti.visible : "") +
-    "\nversione pagina: con confronto + C12 senza partecipanti" +
-    "\nerrori: " + (S.err || "nessuno");
 }
 async function loadAll(){
   try{ await loadAllInner(); }
@@ -1543,7 +1521,6 @@ $("bSrch").onclick = ()=>{
   if(open){ $("q").value=""; render(); } else $("q").focus();
 };
 $("q").addEventListener("input", render);
-$("dDbg").onclick = ()=>{ closeDrawer(); try{ localStorage.setItem("toto_dbg", dbgOn() && localStorage.getItem("toto_dbg")==="1" ? "0" : "1"); }catch(e){} dbgPanel(); };
 $("dFull").onclick = ()=>{ closeDrawer(); const el=document.documentElement;
   if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el); };
 
